@@ -13,7 +13,7 @@ import { logger, stream } from '@utils/logger'
 import { useExpressServer, useContainer } from 'routing-controllers'
 import { Container } from 'typedi'
 import path from 'path'
-// import errorMiddleware from '@middlewares/error.middleware'
+import errorMiddleware from '@middlewares/error.middleware'
 import { env } from '@env'
 
 class App {
@@ -29,8 +29,8 @@ class App {
     this.initializeMiddlewares()
     this.initializeRoutes()
     this.initializeSwagger()
-    // this.initializeErrorHandling()
-    // this.register404Page();
+    this.initializeErrorHandling()
+    this.register404Page();
   }
 
   public listen() {
@@ -48,7 +48,7 @@ class App {
 
   private connectToDatabase() {
     DB.sequelize.authenticate()
-    // DB.sequelize.sync({ force: false });
+    DB.sequelize.sync({ force: false });
   }
 
   private initializeMiddlewares() {
@@ -95,9 +95,9 @@ class App {
     this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
   }
 
-//   private initializeErrorHandling() {
-//     this.app.use(errorMiddleware)
-//   }
+  private initializeErrorHandling() {
+    this.app.use(errorMiddleware)
+  }
 }
 
 export default App
