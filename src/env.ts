@@ -30,8 +30,10 @@ export const env = {
     port: normalizePort(process.env.PORT || getOsEnv('APP_PORT')),
     banner: toBool(getOsEnv('APP_BANNER')),
     logDir: getOsEnv('LOG_DIR'),
+    jwt_secret: getOsEnv('JWT_SECRET'),
     fileSystemDriver: getOsEnv('FILESYSTEM_DRIVER'),
     disksDir: getOsEnv('DISKS_DIR') || '/public/uploads',
+    ipfsUrl: getOsEnv('IPFS_HOST'),
   },
   log: {
     level: getOsEnv('LOG_LEVEL'),

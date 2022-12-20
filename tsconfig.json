@@ -24,6 +24,7 @@
     "paths": {
       "@app": ["app"],
       "@decorators/*": ["decorators/*"],
+      "@services/*": ["common/services/*"],
       "@enum/*": ["enum/*"],
       "@env": ["env"],
       "@exceptions/*": ["common/exceptions/*"],

@@ -8,6 +8,16 @@ export default class Hr extends Model<Hr> {
   @Column
   id!: number
 
+  @Column
+  name!: string
+
+  @Column
+  password!: string
+
+  @Column
+  isAdmin!: boolean
+
+
   @CreatedAt
   @Column
   createdAt!: Date
