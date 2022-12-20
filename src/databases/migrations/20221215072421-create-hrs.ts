@@ -18,27 +18,29 @@ module.exports = {
         type: Sequelize.TEXT
       },
       email: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING(256)
       },
       role: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING
       },
-      logo: {allowNull: false,
+      logo: {
+        allowNull: true,
         type: Sequelize.TEXT
       },
       company: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING
       },
       company_industry: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING
       },
       company_size: {
-        allowNull: false,
-        type: Sequelize.INTEGER      },
+        allowNull: true,
+        type: Sequelize.INTEGER     
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
