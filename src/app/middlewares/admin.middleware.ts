@@ -5,7 +5,7 @@ import { HttpException } from '@exceptions/http.exception';
 import { IAccessToken } from '@interfaces/token.interface';
 import { verifyToken } from '@utils/tokenHandler';
 import Hr from '@models/entities/hrs';
-import UserType from '@enum/hr.enum';
+
 
 @Service()
 export class AdminMiddleware implements ExpressMiddlewareInterface {

@@ -7,8 +7,8 @@ import { ModelContainer } from '@decorators/model.decorator'
 
 @Service({ global: true })
 class HrRepository extends BaseRepository<Hr> implements HrRepositoryInterface<Hr> {
-  constructor(@ModelContainer(Hr.tableName) User: ModelCtor<Hr>) {
-    super(User)
+  constructor(@ModelContainer(Hr.tableName) Hr: ModelCtor<Hr>) {
+    super(Hr)
   }
 
   async findByName(name: string): Promise<Hr> {
@@ -16,9 +16,5 @@ class HrRepository extends BaseRepository<Hr> implements HrRepositoryInterface<H
       where: { name: name },
     })
   }
-
-  
 }
-
-
 export default HrRepository

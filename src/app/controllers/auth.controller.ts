@@ -32,8 +32,6 @@ class AuthController extends BaseController {
       //   // Create a new collection for new user
       //   await this.authRepository.createCollection(`Collection #${data[0].id}`, data[0].id);
       // }
-      let hash_password = hr.password;
-
       // const message = loginMessage(name, hash_password);
       // const verifyName = ethers.utils.verifyMessage(message, password);
       const hassPassword = Crypto.AES.decrypt(
@@ -46,7 +44,7 @@ class AuthController extends BaseController {
         const accessToken = createAccessToken(hr, false);
         const refreshToken = createRefreshToken(hr, false);
         // Save to redis
-        setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
+        //setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
 
         return this.setData({
           accessToken,
