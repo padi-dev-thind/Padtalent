@@ -39,6 +39,7 @@ export class BaseController {
       code: this.code,
       data: this.data,
       message: this.message,
+      stack:''
     }
     if (this.typeRes === TYPE_RES.JSON) {
       return res.status(this.code).json(result)
