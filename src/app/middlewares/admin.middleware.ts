@@ -5,7 +5,7 @@ import { HttpException } from '@exceptions/http.exception';
 import { IAccessToken } from '@interfaces/token.interface';
 import { verifyToken } from '@utils/tokenHandler';
 import Hr from '@models/entities/hrs';
-import UserType from '@enum/hr.enum';
+
 
 @Service()
 export class AdminMiddleware implements ExpressMiddlewareInterface {
@@ -25,7 +25,7 @@ export class AdminMiddleware implements ExpressMiddlewareInterface {
         raw: true,
       });
 
-      if (hr.isAdmin != true) {
+      if (hr.is_admin != true) {
         return next(new HttpException(401, 'Not admin'));
       }
       request.hr = hr;

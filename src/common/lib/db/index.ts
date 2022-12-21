@@ -1,13 +1,13 @@
 import { ModelCtor } from 'sequelize-typescript'
 
 import DB from '@models/index'
-import User from '@models/entities/users.entity'
+import Hr from '@models/entities/hrs'
 
 export function getModelFromTableName(tableName: string): ModelCtor | undefined {
   let item = undefined
   switch (tableName) {
-    case User.tableName:
-      item = DB.sequelize.model(User)
+    case Hr.tableName:
+      item = DB.sequelize.model(Hr)
       break
     default:
       item = undefined

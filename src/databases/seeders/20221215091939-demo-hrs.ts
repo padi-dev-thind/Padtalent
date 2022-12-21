@@ -13,8 +13,9 @@ module.exports = {
       logo:'logo',
       company_industry: 'tech',
       company_size: 40,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      is_admin:true,
+      created_at: new Date(),
+      updated_at: new Date()
     },
     {
       id:2,
@@ -26,8 +27,8 @@ module.exports = {
       logo:'logo',
       company_industry: 'tech',
       company_size: 20,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     },
     {
       id:3,
@@ -39,8 +40,8 @@ module.exports = {
       logo:'logo',
       company_industry:' tech',
       company_size: 20,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     },
     {
       id:4,
@@ -52,8 +53,8 @@ module.exports = {
       logo:'logo',
       company_industry: 'tech',
       company_size: 80,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }]);
   },
 
