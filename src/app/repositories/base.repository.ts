@@ -1,26 +1,33 @@
-import { Service } from 'typedi'
-import { ModelCtor, Model } from 'sequelize-typescript'
-import { BaseRepositoryInterface } from './interfaces/base.repository.interface'
+import { Service } from 'typedi';
+import { ModelCtor, Model } from 'sequelize-typescript';
+import { BaseRepositoryInterface } from './interfaces/base.repository.interface';
 
 @Service()
 export abstract class BaseRepository<M extends Model> implements BaseRepositoryInterface {
-  protected model: ModelCtor<M>
+  protected model: ModelCtor<M>;
 
   constructor(model: ModelCtor<M>) {
-    this.model = model
-    console.log(model)
+    this.model = model;
   }
 
   async findById(id: number): Promise<M> {
-    return this.model.findByPk(id)
+    return this.model.findByPk(id);
   }
 
-  async getAll(): Promise<M[]> {
-    return this.model.findAll()
+  async getAll(object: any): Promise<M[]> {
+    return this.model.findAll(object);
+  }
+
+  async getAllAndCount(): Promise<{ rows: M[]; count: number }> {
+    return this.model.findAndCountAll({ raw: true });
   }
 
   async findByCondition(object: Object): Promise<M> {
-    return this.model.findOne(object)
+    return this.model.findOne(object);
+  }
+
+  async findOrCreateByCondition(object: Object): Promise<[M, boolean]> {
+    return this.model.findOrCreate(object);
   }
 
   async getByCondition(whereClause: any, offset: number, limit: number, orderBy: any) {
@@ -29,7 +36,7 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
       order: orderBy,
       offset,
       limit,
-    })
+    });
   }
 
   async create(object: any): Promise<M> {
@@ -37,11 +44,15 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
   }
 
   async createWithAssociation(object: any, association: any) {
-    return this.model.create(object, association)
+    return this.model.create(object, association);
   }
 
   async deleteById(id: any): Promise<number> {
-    return this.model.destroy({ where: { id: id } })
+    return this.model.destroy({ where: { id: id } });
+  }
+
+  async update(object: Object, condition: any): Promise<any> {
+    return this.model.update(object, condition);
   }
 
   /**
@@ -58,12 +69,12 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
    */
   _createEqualWhereClause({ key, value, allowNull = false }): object {
     if (!allowNull && this._isNullish(value)) {
-      return {}
+      return {};
     }
 
     return {
       [key]: value,
-    }
+    };
   }
 
   /**
@@ -73,6 +84,6 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
      * @returns {boolean} true: nullish
      */
   _isNullish(value): boolean {
-    return value === undefined || value === null
+    return value === undefined || value === null;
   }
 }
