@@ -12,6 +12,7 @@ const errorMiddleware = (error: HttpException, req: Request, res: Response, next
     code: code,
     message: message,
     data: {},
+    stack:""
   }
   const stack = error.stack
   if (env.node == 'development') return res.status(code).send({ ...result, stack })
