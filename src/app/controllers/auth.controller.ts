@@ -12,6 +12,7 @@ import { REFRESH_TTL } from '@utils/constants';
 import random from '@utils/random';
 import { IAccessToken } from '@interfaces/token.interface';
 import * as Crypto from 'crypto-js'
+import { env } from '@env'
 
 
 @JsonController('/auth')
@@ -25,20 +26,19 @@ class AuthController extends BaseController {
   async login(@Req() req: Request, @Res() res: Response, next: NextFunction) {
     try {
       const loginDto: LoginDto = req.body;
-      const { name, password } = loginDto;
+      const {name, password} = loginDto;
       const data = await this.authRepository.findByName(name);
-      const hr = data[0];
+      const hr = data;
+      // res.json(hr)
       // if (data[1] == true) {
       //   // Create a new collection for new user
       //   await this.authRepository.createCollection(`Collection #${data[0].id}`, data[0].id);
       // }
-      let hash_password = hr.password;
-
       // const message = loginMessage(name, hash_password);
       // const verifyName = ethers.utils.verifyMessage(message, password);
       const hassPassword = Crypto.AES.decrypt(
         hr.password,
-        process.env.PASS_SEC,
+        env.auth.pass_sec,
       );
       const originalPassword = hassPassword.toString(Crypto.enc.Utf8);
 
@@ -46,7 +46,7 @@ class AuthController extends BaseController {
         const accessToken = createAccessToken(hr, false);
         const refreshToken = createRefreshToken(hr, false);
         // Save to redis
-        setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
+        //setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
 
         return this.setData({
           accessToken,

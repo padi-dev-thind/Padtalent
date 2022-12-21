@@ -80,6 +80,7 @@ export const env = {
   auth: {
     defaultProvider: getOsEnv('AUTH_DEFAULT_PROVIDER'),
     jwtSecret: getOsEnv('JWT_SECRET'),
+    pass_sec: getOsEnv('PASS_SEC')
   },
   cors: {
     origin: getOsEnv('ORIGIN'),

@@ -15,14 +15,14 @@ export default class Hr extends Model<Hr> {
   password!: string
 
   @Column
-  isAdmin!: boolean
+  is_admin!: boolean
 
 
   @CreatedAt
   @Column
-  createdAt!: Date
+  created_at!: Date
 
   @UpdatedAt
   @Column
-  updatedAt!: Date
+  updated_at!: Date
 }

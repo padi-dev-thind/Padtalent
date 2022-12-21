@@ -1,6 +1,6 @@
 import { createClient } from 'redis';
 
-const client = createClient();
+const client = createClient({legacyMode: true , url: 'redis://redis:6379' });
 
 const setCacheExpire = async (key: string, value: any, ttl: number) => {
   try {

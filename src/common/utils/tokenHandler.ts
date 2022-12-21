@@ -7,9 +7,7 @@ const createAccessToken = (Hr: Hr, isAdmin: boolean): string => {
   return jwt.sign(
     {
       id: Hr.id,
-      isAdmin: isAdmin
     },
-
     env.app.jwt_secret as jwt.Secret,
     {
       expiresIn: '3h',
@@ -21,7 +19,6 @@ const createRefreshToken = (Hr: Hr, isAdmin: boolean): string => {
   return jwt.sign(
     {
       id: Hr.id,
-      isAdmin: isAdmin
     },
     env.app.jwt_secret as jwt.Secret,
     {
