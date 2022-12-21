@@ -25,7 +25,7 @@ export class AdminMiddleware implements ExpressMiddlewareInterface {
         raw: true,
       });
 
-      if (hr.isAdmin != true) {
+      if (hr.is_admin != true) {
         return next(new HttpException(401, 'Not admin'));
       }
       request.hr = hr;

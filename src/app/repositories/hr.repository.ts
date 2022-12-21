@@ -14,6 +14,7 @@ class HrRepository extends BaseRepository<Hr> implements HrRepositoryInterface<H
   async findByName(name: string): Promise<Hr> {
     return this.findByCondition({
       where: { name: name },
+      raw: true
     })
   }
 }
