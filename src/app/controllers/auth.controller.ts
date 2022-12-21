@@ -36,11 +36,11 @@ class AuthController extends BaseController {
       // }
       // const message = loginMessage(name, hash_password);
       // const verifyName = ethers.utils.verifyMessage(message, password);
-      const hassPassword = Crypto.AES.decrypt(
+      const hashPassword = Crypto.AES.decrypt(
         hr.password,
         env.auth.pass_sec,
       );
-      const originalPassword = hassPassword.toString(Crypto.enc.Utf8);
+      const originalPassword = hashPassword.toString(Crypto.enc.Utf8);
 
       if (originalPassword == password) {
         const accessToken = createAccessToken(hr, false);
