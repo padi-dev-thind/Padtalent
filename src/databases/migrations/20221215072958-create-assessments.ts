@@ -9,7 +9,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-
       hr_id: {
         allowNull: false,
         type: Sequelize.INTEGER,
@@ -17,6 +16,12 @@ module.exports = {
           model: 'hrs',
           key: 'id'
         }
+      },
+      link: {
+        allowNull: false,
+        type: Sequelize.STRING,
+        defaultValue: `Padtalent/invite/${this.id}`
+        
       },
       name: {
         allowNull: false,

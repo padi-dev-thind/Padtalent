@@ -16,6 +16,9 @@ export default class Assessment extends Model<Assessment> {
   name!: string
 
   @Column
+  link!: string
+
+  @Column
   start_date!: Date
 
   @Column
