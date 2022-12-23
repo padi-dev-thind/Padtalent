@@ -8,6 +8,7 @@ import { AuthMiddleware } from '@middlewares/auth.middleware';
 import { Service } from 'typedi';
 import {AsssessmentDto} from '../../dtos/assessment.dto'
 import { AuthRequest } from '@interfaces/response.interface';
+import { link } from 'fs';
 
 
 
@@ -44,6 +45,8 @@ class AssessmentController extends BaseController {
         //create new assessment
         await this.assessmentRepository.createbyName(hr.id, name,  start_date, end_date)
         const assessment =  await this.assessmentRepository.findByCondition({where:{hr_id: hr.id, name: name}})
+        const link = 'Padtalent/invite/' + assessment.id
+        await this.assessmentRepository.update({link: link},{where:{id: assessment.id}})
         //insert new assessment's game types 
         if(visual)
         await this.assessment_game_typeRepository.create({assessment_id: assessment.id, game_type_id: 1})
