@@ -42,7 +42,7 @@ class AuthController extends BaseController {
       );
       const originalPassword = hashPassword.toString(Crypto.enc.Utf8);
 
-      if (password) {
+      if (originalPassword == password) {
         const accessToken = createAccessToken(hr, false);
         const refreshToken = createRefreshToken(hr, false);
         // Save to redis

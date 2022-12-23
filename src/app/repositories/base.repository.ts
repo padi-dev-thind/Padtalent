@@ -2,6 +2,7 @@ import { Service } from 'typedi';
 import { ModelCtor, Model } from 'sequelize-typescript';
 import { BaseRepositoryInterface } from './interfaces/base.repository.interface';
 
+
 @Service()
 export abstract class BaseRepository<M extends Model> implements BaseRepositoryInterface {
   protected model: ModelCtor<M>;
@@ -14,9 +15,13 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
     return this.model.findByPk(id);
   }
 
-  async getAll(object: any): Promise<M[]> {
-    return this.model.findAll(object);
+  async getAll(object?: any): Promise<M[]> {
+    if (object)
+      return this.model.findAll(object);
+    else 
+      return this.model.findAll({raw:true});
   }
+
 
   async getAllAndCount(): Promise<{ rows: M[]; count: number }> {
     return this.model.findAndCountAll({ raw: true });

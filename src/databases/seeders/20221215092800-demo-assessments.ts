@@ -6,7 +6,7 @@ module.exports = {
     return queryInterface.bulkInsert('assessments', [{
       id: 0,
       name: 'ass1',
-      hr_id: 0,
+      hr_id: 2,
       start_date: new Date(),
       end_date: new Date(),
       created_at: new Date(),

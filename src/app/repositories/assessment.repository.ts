@@ -2,7 +2,7 @@ import Assessment from '@models/entities/assessments'
 import { Service } from 'typedi'
 import { ModelCtor } from 'sequelize-typescript'
 import { BaseRepository } from './base.repository'
-import { AssessmentRepositoryInterface } from './interfaces/assessment.interface'
+import { AssessmentRepositoryInterface } from './interfaces/assessment.repository.interface'
 import { ModelContainer } from '@decorators/model.decorator'
 
 @Service({ global: true })

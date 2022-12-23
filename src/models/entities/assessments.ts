@@ -9,12 +9,8 @@ export default class Assessment extends Model<Assessment> {
   @Column
   id!: number
 
-  @ForeignKey(() => Hr)
-  @Column({
-    allowNull: false,
-    field: 'hr_id'
-  })
-  hr_id!: number;
+  @Column
+  hr_id!: number
 
   @Column
   name!: string

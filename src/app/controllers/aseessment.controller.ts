@@ -1,5 +1,7 @@
 import { NextFunction, Response, Request } from 'express';
 import AssessmentRepository from '@repositories/assessment.repository';
+import Assessment_game_typeRepository from '@repositories/assessment_game_type.repository';
+import Hr_game_typeRepository from '@repositories/hr_game_type.repository';
 import { BaseController } from './base.controller';
 import { Authorized, UseBefore, BadRequestError, CurrentUser, Body, Get, JsonController, Post, Req, Res, Delete, Put } from 'routing-controllers';
 import { AuthMiddleware } from '@middlewares/auth.middleware';
@@ -12,7 +14,12 @@ import { AuthRequest } from '@interfaces/response.interface';
 @JsonController('/assessment')
 @Service()
 class AssessmentController extends BaseController {
-  constructor(protected assessmentRepository: AssessmentRepository) {
+  constructor(
+    protected assessmentRepository: AssessmentRepository,
+    protected assessment_game_typeRepository: Assessment_game_typeRepository,
+    protected hr_game_typeRepository: Hr_game_typeRepository
+  )
+  {
     super();
   }
   
@@ -20,14 +27,30 @@ class AssessmentController extends BaseController {
   @UseBefore(AuthMiddleware)
   @Post('/create')
   async create(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    console.log('a')
     try {
+      
         const assessDto: AsssessmentDto = req.body;
         const hr = req.hr
-        const {name, start_date, end_date} = assessDto;
-        //res.json({hr_id: hr.id, name: assessDto.name})
+        const {name, visual, memory, start_date, end_date} = assessDto;
+        //check if hr hr has right to approach the game type
+        if (visual)
+        console.log(hr.id)
+        var hasVisualType = await this.hr_game_typeRepository.findByCondition({where:{hr_id: hr.id, game_type_id: 1}})
+        if (memory)
+        var hasMemoryType = await this.hr_game_typeRepository.findByCondition({where:{hr_id: hr.id, game_type_id: 2}})
+        if (!hasVisualType || !hasMemoryType )
+          throw new BadRequestError('Do not have the right');
+        //create new assessment
         await this.assessmentRepository.createbyName(hr.id, name,  start_date, end_date)
-        return this.setData(
-            'Create assessment successfully'
+        const assessment =  await this.assessmentRepository.findByCondition({where:{hr_id: hr.id, name: name}})
+        //insert new assessment's game types 
+        if(visual)
+        await this.assessment_game_typeRepository.create({assessment_id: assessment.id, game_type_id: 1})
+        if(memory)
+        await this.assessment_game_typeRepository.create({assessment_id: assessment.id, game_type_id: 2})
+        return this.setData( 
+            assessment
           )
             .setMessage('Success')
             .responseSuccess(res);
@@ -43,8 +66,13 @@ class AssessmentController extends BaseController {
     try {
         const assessDto: AsssessmentDto = req.body;
         const hr = req.hr
-        const {name, start_date, end_date} = assessDto;
+        const {name, visual, memory, start_date, end_date} = assessDto;
         //res.json({hr_id: hr.id, name: assessDto.name})
+        if(visual)
+        await this.assessment_game_typeRepository.findOrCreateByCondition({assessment_id: req.params.id, game_type_id: 1})
+        if(memory)
+        await this.assessment_game_typeRepository.findOrCreateByCondition({assessment_id: req.params.id, game_type_id: 2})
+
         await this.assessmentRepository.update(
           {name: name,  start_date: start_date, end_date: end_date},
           {where:{
@@ -67,6 +95,7 @@ class AssessmentController extends BaseController {
   async delete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
         await this.assessmentRepository.deleteById(req.params.id)
+        
         return this.setData(
             'Delete assessment successfully'
           )

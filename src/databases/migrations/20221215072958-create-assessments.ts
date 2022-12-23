@@ -9,6 +9,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+
       hr_id: {
         allowNull: false,
         type: Sequelize.INTEGER,

@@ -14,7 +14,7 @@
     "db:up": "sequelize-cli db:migrate",
     "db:down": "sequelize-cli db:migrate:undo:all",
     "db:seed:all": "sequelize-cli db:seed:all",
-    "db:refresh": "npm run db:drop; npm run db:setup; npm run db:seed:all;",
+    "db:refresh": "npm run db:drop ; npm run db:up; npm run db:seed:all;",
     "test": "export NODE_ENV=test; npm run db:refresh; jest --ci --passWithNoTests;",
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",
     "lint:fix": "npm run lint -- --fix",
