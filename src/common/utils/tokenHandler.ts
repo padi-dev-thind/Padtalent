@@ -10,7 +10,7 @@ const createAccessToken = (Hr: Hr, isAdmin: boolean): string => {
     },
     env.app.jwt_secret as jwt.Secret,
     {
-      expiresIn: '3h',
+      expiresIn: '7d',
     },
   );
 };

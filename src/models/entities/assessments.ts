@@ -1,4 +1,5 @@
-import { Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import Hr from '@models/entities/hrs'
 
 @Table({
   tableName: 'assessments',
@@ -8,11 +9,23 @@ export default class Assessment extends Model<Assessment> {
   @Column
   id!: number
 
+  @Column
+  hr_id!: number
+
+  @Column
+  name!: string
+
+  @Column
+  start_date!: Date
+
+  @Column
+  end_date!: Date
+
   @CreatedAt
   @Column
-  createdAt!: Date
+  created_at!: Date
 
   @UpdatedAt
   @Column
-  updatedAt!: Date
+  updated_at!: Date
 }

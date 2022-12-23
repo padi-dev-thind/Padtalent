@@ -8,11 +8,17 @@ export default class Game_type extends Model<Game_type> {
   @Column
   id!: number
 
+  @Column
+  type!: string
+
+  @Column
+  total_time!: number
+
   @CreatedAt
   @Column
-  createdAt!: Date
+  created_at!: Date
 
   @UpdatedAt
   @Column
-  updatedAt!: Date
+  updated_at!: Date
 }

@@ -27,6 +27,12 @@ export class BaseController {
     return this
   }
 
+  public setStack(stack: string): this {
+    this.stack = stack;
+
+    return this;
+  }
+
   public setMessage(message: string): this {
     this.message = message
 
@@ -39,7 +45,7 @@ export class BaseController {
       code: this.code,
       data: this.data,
       message: this.message,
-      stack:''
+      stack:this.stack
     }
     if (this.typeRes === TYPE_RES.JSON) {
       return res.status(this.code).json(result)

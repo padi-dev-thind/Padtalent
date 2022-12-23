@@ -6,11 +6,11 @@ module.exports = {
     return queryInterface.bulkInsert('assessments', [{
       id: 0,
       name: 'ass1',
-      hr_id: 0,
+      hr_id: 2,
       start_date: new Date(),
       end_date: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     },
     {
       id: 1,
@@ -18,17 +18,17 @@ module.exports = {
       hr_id: 2,
       start_date: new Date(),
       end_date: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     },
     {
       id: 2,
       name: 'ass3',
       hr_id: 3,
-      createdAt: new Date(),
       start_date: new Date(),
       end_date: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     },
     {
       id: 4,
@@ -36,8 +36,8 @@ module.exports = {
       hr_id: 4,
       start_date: new Date(),
       end_date: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+      created_at: new Date(),
+      updated_at: new Date()
     }]);
   },
 
