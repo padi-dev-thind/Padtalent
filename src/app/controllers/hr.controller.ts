@@ -10,6 +10,7 @@ import { HrDto } from 'dtos/hr.dto';
 import { AdminMiddleware } from '@middlewares/admin.middleware';
 import * as bcrypt from 'bcrypt'
 import { env } from '@env';
+import { toNumber } from '@lib/env';
 
 
 
@@ -37,7 +38,7 @@ class AssessmentController extends BaseController {
       //   password,
       //   env.auth.pass_sec
       // )
-      const hashPassword = await bcrypt.hash(password, env.auth.pass_sec)
+      const hashPassword = await bcrypt.hash(password, toNumber(env.auth.pass_sec))
 
       const newHr = await this.hrRepository.create({name:name, password: hashPassword, logo: logo, role: role, company: company,
          company_industry: company_industry, company_size: company_size, email:email })
@@ -50,8 +51,6 @@ class AssessmentController extends BaseController {
           .catch((Error)=>
             console.log(Error)
           )
-          
-      
       return this.setData( 
             newHr
           )
