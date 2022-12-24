@@ -7,12 +7,9 @@ import { Service } from 'typedi';
 import { setCacheExpire, getCacheExpire } from '@services/redis';
 import { createAccessToken, createRefreshToken, verifyToken } from '@utils/tokenHandler';
 import { loginMessage } from '@utils/message';
-import { ethers } from 'ethers';
-import { REFRESH_TTL } from '@utils/constants';
-import random from '@utils/random';
-import { IAccessToken } from '@interfaces/token.interface';
-import * as Crypto from 'crypto-js'
+import * as bcrypt from 'bcrypt'
 import { env } from '@env'
+
 
 
 @JsonController('/auth')
@@ -36,13 +33,9 @@ class AuthController extends BaseController {
       // }
       // const message = loginMessage(name, hash_password);
       // const verifyName = ethers.utils.verifyMessage(message, password);
-      const hashPassword = Crypto.AES.decrypt(
-        hr.password,
-        env.auth.pass_sec,
-      );
-      const originalPassword = hashPassword.toString(Crypto.enc.Utf8);
 
-      if (originalPassword == password) {
+      bcrypt.compare(password,hr.password)
+      if (await bcrypt.compare(password,hr.password)) {
         const accessToken = createAccessToken(hr, false);
         const refreshToken = createRefreshToken(hr, false);
         // Save to redis

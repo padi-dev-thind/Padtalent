@@ -15,7 +15,7 @@ module.exports = {
       },
       password: {
         allowNull: false,
-        type: Sequelize.TEXT
+        type: Sequelize.JSON
       },
       email: {
         allowNull: true,
