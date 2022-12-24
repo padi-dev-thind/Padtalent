@@ -1,6 +1,8 @@
 import { NextFunction, Response, Request } from 'express';
 import AssessmentRepository from '@repositories/assessment.repository';
 import Assessment_game_typeRepository from '@repositories/assessment_game_type.repository';
+import TestRepository from '@repositories/test.repository';
+import CandidateRepository from '@repositories/candidate.repository';
 import Hr_game_typeRepository from '@repositories/hr_game_type.repository';
 import { BaseController } from './base.controller';
 import { Authorized, UseBefore, BadRequestError, CurrentUser, Body, Get, JsonController, Post, Req, Res, Delete, Put } from 'routing-controllers';
@@ -8,7 +10,9 @@ import { AuthMiddleware } from '@middlewares/auth.middleware';
 import { Service } from 'typedi';
 import {AsssessmentDto} from '../../dtos/assessment.dto'
 import { AuthRequest } from '@interfaces/response.interface';
-import { link } from 'fs';
+import { TestDto } from 'dtos/test.dto';
+import Candidate from '@models/entities/candidates';
+
 
 
 
@@ -18,7 +22,9 @@ class AssessmentController extends BaseController {
   constructor(
     protected assessmentRepository: AssessmentRepository,
     protected assessment_game_typeRepository: Assessment_game_typeRepository,
-    protected hr_game_typeRepository: Hr_game_typeRepository
+    protected testRepository: TestRepository,
+    protected hr_game_typeRepository: Hr_game_typeRepository,
+    protected candidateRepository: CandidateRepository,
   )
   {
     super();
@@ -106,6 +112,52 @@ class AssessmentController extends BaseController {
             .responseSuccess(res);
     } catch (error) {
       return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+    }
+  }
+
+  
+  @Authorized()
+  @UseBefore(AuthMiddleware)
+  @Get('/result/:id')
+  async getResult(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+        const id = req.params.id
+        const {count, rows} = await this.testRepository.getByCondition({assessment_id: id}, 0, 100)
+       
+        // const result = rows.map(function(test){
+          
+        //   return ({
+        //   id: test.id,
+        //   candidate_id: test.candidate_id,
+        //   game_type_id: test.game_type_id,
+        //   result: test.result})
+        // })
+
+        const results = await Promise.all(rows.map(async function(test){
+          const candidate_id = test.candidate_id
+          const candidate = await Candidate.findByPk(candidate_id)
+          const candidate_email = candidate.email
+          console.log(candidate.email)
+          return ({
+            id: test.id,
+            candidate_id: test.candidate_id,
+            candidate_email: candidate_email,
+            game_type_id: test.game_type_id,
+            result: test.result
+          })
+          }))
+
+
+          return this.setData(
+          results
+          )
+            .setCode(200)
+            .setMessage('Success')
+            .responseSuccess(res);
+    } catch (error) {
+      return this.setCode(error?.status || 500)
+        .setMessage(error?.message || 'Internal server error')
+        .responseErrors(res);
     }
   }
 

@@ -8,6 +8,12 @@ export default class Candidate extends Model<Candidate> {
   @Column
   id!: number
 
+  @Column
+  email!: string
+
+  @Column
+  name!: string
+
   @CreatedAt
   @Column
   createdAt!: Date

@@ -31,7 +31,7 @@ module.exports = {
 
   async down (queryInterface, Sequelize) {
     return queryInterface.bulkDelete('assessments_game_types', [ {
-      assessment_id:[0,2]
+      id:[1,2]
     }])
   }
 };
