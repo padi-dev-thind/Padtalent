@@ -10,12 +10,12 @@ import { HrDto } from 'dtos/hr.dto';
 import { AdminMiddleware } from '@middlewares/admin.middleware';
 import * as bcrypt from 'bcrypt'
 import { env } from '@env';
-
+import { toNumber } from '@lib/env/utils';
 
 
 @JsonController('/hr')
 @Service()
-class AssessmentController extends BaseController {
+class HrController extends BaseController {
   constructor(
     protected hrRepository: HrRepository,
     protected hr_game_typeRepository: Hr_game_typeRepository
@@ -37,7 +37,7 @@ class AssessmentController extends BaseController {
       //   password,
       //   env.auth.pass_sec
       // )
-      const hashPassword = await bcrypt.hash(password, env.auth.pass_sec)
+      const hashPassword = await bcrypt.hash(password, toNumber(env.auth.pass_sec))
 
       const newHr = await this.hrRepository.create({name:name, password: hashPassword, logo: logo, role: role, company: company,
          company_industry: company_industry, company_size: company_size, email:email })
@@ -78,7 +78,26 @@ class AssessmentController extends BaseController {
     }
   }
 
+  @Authorized()
+  @UseBefore(AuthMiddleware)
+  @Get('/profile/:id')
+  async getProfile(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    console.log("a")
+    try {
+    const id = req.params.id
+      const hr = await this.hrRepository.findByCondition({where:{id: req.params.id}})
+      console.log(hr)
+      return this.setData( 
+            hr
+          )
+            .setMessage('Success')
+            .responseSuccess(res);
+    } catch (error) {
+      return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+    }
+  }
+
 }
 
-export default AssessmentController
+export default HrController
 

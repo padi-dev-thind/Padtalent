@@ -6,7 +6,7 @@ module.exports = {
     return queryInterface.bulkInsert('hrs', [{
       id:0,
       name: 'hr1',
-      password: 'pass1',
+      password: "$2b$10$RLommFfZxVsAg.HlUET67OWeINWJehYXibxAHmQMYhwdp81Zyrrzq" ,//pass
       email: 'hr@1',
       role: 'hr',
       company: 'pad',
@@ -20,7 +20,7 @@ module.exports = {
     {
       id:2,
       name: 'hr2',
-      password: 'pass2',
+      password: "$2b$10$RLommFfZxVsAg.HlUET67OWeINWJehYXibxAHmQMYhwdp81Zyrrzq" ,//pass,
       email: 'hr@2',
       role: 'hr',
       company: 'pad',
@@ -33,7 +33,7 @@ module.exports = {
     {
       id:3,
       name: 'hr3',
-      password: 'pass3',
+      password: "$2b$10$RLommFfZxVsAg.HlUET67OWeINWJehYXibxAHmQMYhwdp81Zyrrzq" ,//pass,
       email: 'hr@3',
       role: 'hr',
       company:' pad',
@@ -46,7 +46,7 @@ module.exports = {
     {
       id:4,
       name: 'hr4',
-      password: 'pass4',
+      password: "$2b$10$RLommFfZxVsAg.HlUET67OWeINWJehYXibxAHmQMYhwdp81Zyrrzq" ,//pass,
       email: 'hr@4',
       role: 'hr',
       company: 'pad',
