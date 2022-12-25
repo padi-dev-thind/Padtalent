@@ -11,7 +11,7 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
     this.model = model;
   }
 
-  async findById(id: number): Promise<M> {
+  async findById(id: any): Promise<M> {
     return this.model.findByPk(id);
   }
 
@@ -35,12 +35,11 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
     return this.model.findOrCreate(object);
   }
 
-  async getByCondition(whereClause: any, offset: number, limit: number, orderBy: any) {
+  async getByCondition(whereClause: any, offset: number, limit: number) {
     return this.model.findAndCountAll({
       where: whereClause,
-      order: orderBy,
-      offset,
-      limit,
+      offset: offset,
+      limit: limit
     });
   }
 

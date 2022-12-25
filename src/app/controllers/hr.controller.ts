@@ -13,6 +13,7 @@ import { env } from '@env';
 import { toNumber } from '@lib/env/utils';
 
 
+
 @JsonController('/hr')
 @Service()
 class HrController extends BaseController {
@@ -50,8 +51,6 @@ class HrController extends BaseController {
           .catch((Error)=>
             console.log(Error)
           )
-          
-      
       return this.setData( 
             newHr
           )
