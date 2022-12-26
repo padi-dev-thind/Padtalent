@@ -16,9 +16,9 @@ export default class Candidate extends Model<Candidate> {
 
   @CreatedAt
   @Column
-  createdAt!: Date
+  created_at!: Date
 
   @UpdatedAt
   @Column
-  updatedAt!: Date
+  updated_at!: Date
 }
