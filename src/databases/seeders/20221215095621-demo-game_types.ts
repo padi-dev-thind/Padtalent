@@ -5,7 +5,7 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('game_types', [{
       id: 1,
-      type: 'visual',
+      type: 'logical',
       total_time: 90,
       created_at: new Date(),
       updated_at: new Date()

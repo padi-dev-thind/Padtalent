@@ -28,6 +28,11 @@ module.exports = {
       status:{
         allowNull: false,
         type: Sequelize.STRING(20),
+        validate:{
+          isIn:[['ready', 'not ready','deleted' ,'time out']]
+        },
+        defaultValue:'not ready'
+
       },
       created_at: {
         allowNull: false,

@@ -25,6 +25,21 @@ module.exports = {
           key: 'id'
         }
       },
+      candidate_answer: {
+        allowNull: true,
+        type: Sequelize.STRING(5),
+        validate:{
+          isIn:[['yes','no']]
+        }
+      },
+      status:{
+        allowNull: false,
+        type: Sequelize.STRING(20),
+        validate:{
+          isIn:[['not answer','correct answer','wrong answer' ,'time out', 'skiped']]
+        },
+        defaultValue:'not answer'
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE

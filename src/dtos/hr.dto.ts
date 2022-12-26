@@ -44,7 +44,7 @@ export class HrDto {
   email: string;
 
   @Expose()
-  visual: boolean;
+  logical: boolean;
 
   @Expose()
   memory: boolean;

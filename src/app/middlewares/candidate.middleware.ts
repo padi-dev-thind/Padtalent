@@ -7,7 +7,7 @@ import { verifyToken } from '@utils/tokenHandler';
 import Candidate from '@models/entities/candidates';
 
 @Service()
-export class CandidatedateMiddleware implements ExpressMiddlewareInterface {
+export class CandidateMiddleware implements ExpressMiddlewareInterface {
   // interface implementation is optional
   async use(request: AuthRequest, response: any, next?: (err?: any) => any): Promise<any> {
     const bearer = request.headers.authorization;

@@ -18,7 +18,16 @@ export default class Test extends Model<Test> {
   assessment_id!: number
 
   @Column
+  total_time!: number
+
+  @Column
+  status!: string
+
+  @Column
   result!: number
+
+  @Column
+  number_of_questions!: number
 
   @Column
   start_time!: Date

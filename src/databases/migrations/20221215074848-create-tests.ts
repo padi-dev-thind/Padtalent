@@ -33,8 +33,23 @@ module.exports = {
           key: 'id'
         }
       },
-      result: {
+      status: {
         allowNull: false,
+        type: Sequelize.STRING(20),
+        validate:{
+          isIn: [['completed', 'in progress','not start']]
+        }
+      },
+      total_time: {
+        allowNull: false,
+        type: Sequelize.INTEGER
+      },
+      number_of_questions: {
+        allowNull: false,
+        type: Sequelize.INTEGER
+      },
+      result: {
+        allowNull: true,
         type: Sequelize.INTEGER
       },
       start_time: {
