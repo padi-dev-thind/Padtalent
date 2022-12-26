@@ -1,4 +1,5 @@
 import Hr from '@models/entities/hrs';
+import Candidate from '@models/entities/candidates';
 import { IAccessToken, IRefreshToken } from '@interfaces/token.interface';
 import jwt from 'jsonwebtoken';
 import { env } from '@env';
@@ -11,6 +12,18 @@ const createAccessToken = (Hr: Hr, isAdmin: boolean): string => {
     env.app.jwt_secret as jwt.Secret,
     {
       expiresIn: '7d',
+    },
+  );
+};
+
+const createCandidateAccessToken = (Candidate: Candidate, isAdmin: boolean): string => {
+  return jwt.sign(
+    {
+      id: Candidate.id,
+    },
+    env.app.jwt_secret as jwt.Secret,
+    {
+      expiresIn: '7d',//last change 1h
     },
   );
 };
@@ -38,4 +51,4 @@ const verifyToken = async (
   });
 };
 
-export { createAccessToken, createRefreshToken, verifyToken };
+export { createAccessToken, createRefreshToken, verifyToken, createCandidateAccessToken };

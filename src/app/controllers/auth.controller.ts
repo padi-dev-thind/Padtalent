@@ -1,21 +1,21 @@
 import { NextFunction, Response, Request } from 'express';
-import { LoginDto } from '../../dtos/auth.dto';
+import { CandidateLoginDto, LoginDto } from '../../dtos/auth.dto';
 import HrRepository from '@repositories/hr.repository';
+import CandidateRepository from '@repositories/candidate.repository';
 import { BaseController } from './base.controller';
 import { BadRequestError, Body, Get, JsonController, Post, Req, Res } from 'routing-controllers';
 import { Service } from 'typedi';
-import { setCacheExpire, getCacheExpire } from '@services/redis';
-import { createAccessToken, createRefreshToken, verifyToken } from '@utils/tokenHandler';
-import { loginMessage } from '@utils/message';
+import {createCandidateAccessToken, createAccessToken, createRefreshToken, verifyToken } from '@utils/tokenHandler';
 import * as bcrypt from 'bcrypt'
-import { env } from '@env'
 
 
 
 @JsonController('/auth')
 @Service()
 class AuthController extends BaseController {
-  constructor(protected authRepository: HrRepository) {
+  constructor(protected authRepository: HrRepository,
+              protected candidateRepository: CandidateRepository
+    ) {
     super();
   }
 
@@ -26,20 +26,11 @@ class AuthController extends BaseController {
       const {name, password} = loginDto;
       const data = await this.authRepository.findByName(name);
       const hr = data;
-      // res.json(hr)
-      // if (data[1] == true) {
-      //   // Create a new collection for new user
-      //   await this.authRepository.createCollection(`Collection #${data[0].id}`, data[0].id);
-      // }
-      // const message = loginMessage(name, hash_password);
-      // const verifyName = ethers.utils.verifyMessage(message, password);
 
       bcrypt.compare(password,hr.password)
       if (await bcrypt.compare(password,hr.password)) {
         const accessToken = createAccessToken(hr, false);
         const refreshToken = createRefreshToken(hr, false);
-        // Save to redis
-        //setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
 
         return this.setData({
           accessToken,
@@ -57,6 +48,35 @@ class AuthController extends BaseController {
         .responseErrors(res);
     }
   }
+
+  
+  @Post('/login-candidate')
+  async loginCandidate(@Req() req: Request, @Res() res: Response, next: NextFunction) {
+    try {
+      const loginDto: CandidateLoginDto = req.body;
+
+      const {name, email} = loginDto
+      const candidate = await this.candidateRepository.findOrCreateByCondition({where:{email: email}});
+
+      if (candidate) {
+        const accessToken = createCandidateAccessToken(candidate[0], false);
+        // Save to redis
+        //setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
+
+        return this.setData({
+          accessToken
+        })
+          .setCode(200)
+          .setMessage('Success')
+          .responseSuccess(res);
+      } else {
+        throw new BadRequestError('Errors');
+      }
+    } catch (error) {
+      return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+    }
+  }
+
 
 //   @Post('/refresh')
 //   async refresh(@Req() req: Request, @Res() res: Response, next: NextFunction) {
@@ -93,3 +113,5 @@ class AuthController extends BaseController {
 }
 
 export default AuthController;
+
+

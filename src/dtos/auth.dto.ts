@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { Allow, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Allow, IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class LoginDto {
   @Expose()
@@ -11,6 +11,19 @@ export class LoginDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+}
+
+export class CandidateLoginDto {
+  @Expose()
+  @IsString()
+  name: string;
+
+  @Expose()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+
 }
 
 export class RefreshDto {
