@@ -1,7 +1,4 @@
-import { JSONType } from 'aws-sdk/clients/s3'
-import { Column, CreatedAt, DataType, Model, PrimaryKey, Sequelize, Table, UpdatedAt } from 'sequelize-typescript'
-import { Json } from 'sequelize/types/utils'
-
+import { Column, CreatedAt, DataType, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 
 @Table({
   tableName: 'hrs',

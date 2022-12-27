@@ -21,6 +21,9 @@ export default class Test extends Model<Test> {
   total_time!: number
 
   @Column
+  remaining_time!: number
+
+  @Column
   status!: string
 
   @Column

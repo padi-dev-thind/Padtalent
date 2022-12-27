@@ -1,6 +1,7 @@
 import { NextFunction, Response, Request } from 'express';
 import CandidateRepository from '@repositories/candidate.repository';
 import TestRepository from '@repositories/test.repository';
+import AssessmentRepository from '@repositories/assessment.repository';
 import { BaseController } from './base.controller';
 import { Authorized, UseBefore, BadRequestError, CurrentUser, Body, Get, JsonController, Post, Req, Res, Delete, Put } from 'routing-controllers';
 import { AuthMiddleware } from '@middlewares/auth.middleware';
@@ -8,6 +9,10 @@ import { Service } from 'typedi';
 import { AuthRequest } from '@interfaces/response.interface';
 import { CandidateMiddleware } from '@middlewares/candidate.middleware';
 import GameType from '@enum/game.enum';
+import Assessment_game_typeRepository from '@repositories/assessment_game_type.repository';
+import Candidates_assessmentsRepository from '@repositories/candidates_assessments.repository';
+import Test from '@models/entities/tests';
+
 
 
 
@@ -16,7 +21,10 @@ import GameType from '@enum/game.enum';
 class TestController extends BaseController {
   constructor(
     protected candidateRepository: CandidateRepository,
-    protected testRepository: TestRepository
+    protected testRepository: TestRepository,
+    protected assessmentRepository: AssessmentRepository,
+    protected assessment_game_typeRepository: Assessment_game_typeRepository,
+    protected candidates_assessmentsRepository: Candidates_assessmentsRepository
   )
   {
     super();
@@ -24,32 +32,49 @@ class TestController extends BaseController {
 
   @Authorized()
   @UseBefore(CandidateMiddleware)
-  @Get('/list')
+  @Get('/list') //create when a test is not exist
   async getTests(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
-        const candidate = req.candidate
-        const tests_raws = await this.testRepository.getAll({where:{candidate_id: 1}})
-        const tests =  await Promise.all(tests_raws.map(function(test){
-            var gameType
-            if (test.game_type_id == GameType.memory)
-                gameType = "memory"
-            else if (test.game_type_id == GameType.logical)
-                gameType = "memory"
+      const assessment_game_types = await this.assessment_game_typeRepository
+        .getAll({where:{assessment_id: req.assessment.id}})
+
+      const tests = await Promise.all(assessment_game_types.map(async function(test_type){
+        const test = await Test.findOne({where:{candidate_id: 1,
+                                                assessment_id: req.assessment.id,
+                                                game_type_id: GameType.logical
+                                        }})
+        let gameType
+        if(test_type.game_type_id == GameType.logical){
+          gameType = "logical"
+        } 
+        else if(test_type.game_type_id == GameType.memory){
+          gameType = "memory"
+        }
+        if (test)
             return ({
-                id: test.id,
-                assessment_id: test.assessment_id,
-                game_type: gameType,
-                status: test.status,
-                result: test.result,
-                total_time: test.total_time,
-                number_of_questions: test.number_of_questions
+              test_type: gameType,
+              test_time: test.total_time,
+              resul: test.result,
+              status: test.status
             })
-        }))
-        return this.setData( 
-            tests
-          )
-            .setMessage('Success')
-            .responseSuccess(res);
+        else {
+          // if test is not created => create here 
+          //logic creation:
+          
+          return({
+              test_type: gameType,
+              test_time: test.total_time,
+              resul: null,
+              status: "not start"
+          })
+        }
+      }))
+
+      return this.setData( 
+          tests
+        )
+          .setMessage('Success')
+          .responseSuccess(res);
     } catch (error) {
       return this.setStack(error.stack).setMessage('Error').responseErrors(res);
     }

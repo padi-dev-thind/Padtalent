@@ -40,6 +40,11 @@ module.exports = {
           isIn: [['completed', 'in progress','not start']]
         }
       },
+      remaining_time: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        defaultValue: 90
+      },
       total_time: {
         allowNull: false,
         type: Sequelize.INTEGER
@@ -53,11 +58,11 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       start_time: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE
       },
       end_time: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE
       },
       created_at: {

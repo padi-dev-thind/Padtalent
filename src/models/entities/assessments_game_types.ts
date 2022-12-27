@@ -1,24 +1,28 @@
-import { Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
-import Assessment from './assessments';
-import Game_type from './game_types';
+import { Column, CreatedAt, DataType, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import Assessment from './assessments'
+import Game_type from './game_types'
 
 @Table({
   tableName: 'assessments_game_types',
 })
 export default class Assessment_game_type extends Model<Assessment_game_type> {
-  
   @PrimaryKey
   @Column
   id!: number
 
   @Column
+  @ForeignKey(() => Assessment)
+  @Column({
+    allowNull: false,
+    field: 'assessment_id'
+  })
   assessment_id!: number
 
-  // @ForeignKey(() => Game_type)
-  // @Column({
-  //   allowNull: false,
-  //   field: 'game_type_id'
-  // })
+  @ForeignKey(() => Game_type)
+  @Column({
+    allowNull: false,
+    field: 'game_type_id'
+  })
   @Column
   game_type_id!: number
 
@@ -29,7 +33,4 @@ export default class Assessment_game_type extends Model<Assessment_game_type> {
   @UpdatedAt
   @Column
   updated_at!: Date
-
-  @Column
-  deledatedAt!: Date
 }

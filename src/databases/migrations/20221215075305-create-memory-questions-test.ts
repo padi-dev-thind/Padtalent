@@ -25,6 +25,10 @@ module.exports = {
           key: 'id'
         }
       },
+      question_number: {
+        allowNull: false,
+        type: Sequelize.INTEGER
+      },
       status:{
         allowNull: false,
         type: Sequelize.STRING(20),

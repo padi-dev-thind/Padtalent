@@ -15,12 +15,7 @@ export class LoginDto {
 
 export class CandidateLoginDto {
   @Expose()
-  @IsString()
-  name: string;
-
-  @Expose()
   @IsNotEmpty()
-  @IsEmail()
   email: string;
 
 

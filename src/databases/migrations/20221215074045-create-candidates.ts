@@ -9,13 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
-        allowNull: true,
-        type: Sequelize.STRING(128)
-      },
       email: {
         allowNull: false,
-        type: Sequelize.STRING(256)
+        type: Sequelize.TEXT
       },
       created_at: {
         allowNull: false,
