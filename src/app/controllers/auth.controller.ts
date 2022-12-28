@@ -7,6 +7,7 @@ import { BadRequestError, Body, Get, JsonController, Post, Req, Res } from 'rout
 import { Service } from 'typedi';
 import {createCandidateAccessToken, createAccessToken, createRefreshToken, verifyToken } from '@utils/tokenHandler';
 import * as bcrypt from 'bcrypt'
+import { toNumber } from '@lib/env';
 
 
 
@@ -50,19 +51,16 @@ class AuthController extends BaseController {
   }
 
   
-  @Post('/login-candidate')
+  @Post('/:id/login-candidate') //id is the id of recent assessemnt 
   async loginCandidate(@Req() req: Request, @Res() res: Response, next: NextFunction) {
     try {
       const loginDto: CandidateLoginDto = req.body;
-
-      const {name, email} = loginDto
+      const email = loginDto.email  
       const candidate = await this.candidateRepository.findOrCreateByCondition({where:{email: email}});
-
-      if (candidate) {
-        const accessToken = createCandidateAccessToken(candidate[0], false);
+      if (candidate){
+        const accessToken = createCandidateAccessToken(candidate[0], toNumber(req.params.id) );
         // Save to redis
         //setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
-
         return this.setData({
           accessToken
         })
@@ -76,7 +74,6 @@ class AuthController extends BaseController {
       return this.setStack(error.stack).setMessage('Error').responseErrors(res);
     }
   }
-
 
 //   @Post('/refresh')
 //   async refresh(@Req() req: Request, @Res() res: Response, next: NextFunction) {

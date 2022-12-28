@@ -12,7 +12,7 @@ export class AsssessmentDto {
   @Expose()
   @IsNotEmpty()
   @IsBoolean()
-  visual: boolean;
+  logical: boolean;
 
   @Expose()
   @IsNotEmpty()

@@ -27,7 +27,7 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
     return this.model.findAndCountAll({ raw: true });
   }
 
-  async findByCondition(object: Object): Promise<M> {
+  async findByCondition(object: Object): Promise<M>  {
     return this.model.findOne(object);
   }
 

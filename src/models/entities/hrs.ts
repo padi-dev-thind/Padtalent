@@ -1,13 +1,11 @@
-import { JSONType } from 'aws-sdk/clients/s3'
-import { Column, CreatedAt, DataType, Model, PrimaryKey, Sequelize, Table, UpdatedAt } from 'sequelize-typescript'
-import { Json } from 'sequelize/types/utils'
-
+import { AutoIncrement, Column, CreatedAt, DataType, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 
 @Table({
   tableName: 'hrs',
 })
 export default class Hr extends Model<Hr> {
   @PrimaryKey
+  @AutoIncrement
   @Column
   id!: number
 
@@ -39,7 +37,6 @@ export default class Hr extends Model<Hr> {
 
   @Column
   is_admin!: boolean
-
 
   @CreatedAt
   @Column

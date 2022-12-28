@@ -1,4 +1,6 @@
 'use strict';
+
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -16,6 +18,13 @@ module.exports = {
       statement2: {
         allowNull: false,
         type: Sequelize.STRING(256)
+      },
+      answer: {
+        allowNull: false,
+        type: Sequelize.STRING(5),
+        validate:{
+          isIn:[['yes','no']]
+        }
       },
       conclusion: {
         allowNull: false,

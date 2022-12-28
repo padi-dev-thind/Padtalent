@@ -10,5 +10,12 @@ class CandidateRepository extends BaseRepository<Candidate> implements Candidate
   constructor(@ModelContainer(Candidate.tableName) Candidate: ModelCtor<Candidate>) {
     super(Candidate)
   }
+
+  async findByEmail(email: string): Promise<Candidate> {
+    return this.findByCondition({
+      where: { email: email },
+      raw: true
+    })
+  }
 }
 export default CandidateRepository

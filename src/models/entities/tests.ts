@@ -1,10 +1,11 @@
-import { Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt, AutoIncrement } from 'sequelize-typescript'
 
 @Table({
   tableName: 'tests',
 })
 export default class Test extends Model<Test> {
   @PrimaryKey
+  @AutoIncrement
   @Column
   id!: number
 
@@ -18,7 +19,19 @@ export default class Test extends Model<Test> {
   assessment_id!: number
 
   @Column
+  total_time!: number
+
+  @Column
+  remaining_time!: number
+
+  @Column
+  status!: string
+
+  @Column
   result!: number
+
+  @Column
+  number_of_questions!: number
 
   @Column
   start_time!: Date

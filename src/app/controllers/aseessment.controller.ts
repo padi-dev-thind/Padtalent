@@ -39,14 +39,14 @@ class AssessmentController extends BaseController {
       
         const assessDto: AsssessmentDto = req.body;
         const hr = req.hr
-        const {name, visual, memory, start_date, end_date} = assessDto;
+        const {name, logical, memory, start_date, end_date} = assessDto;
         //check if hr hr has right to approach the game type
-        if (visual)
+        if (logical)
         console.log(hr.id)
-        var hasVisualType = await this.hr_game_typeRepository.findByCondition({where:{hr_id: hr.id, game_type_id: 1}})
+        var hasLogicalType = await this.hr_game_typeRepository.findByCondition({where:{hr_id: hr.id, game_type_id: 1}})
         if (memory)
         var hasMemoryType = await this.hr_game_typeRepository.findByCondition({where:{hr_id: hr.id, game_type_id: 2}})
-        if (!hasVisualType || !hasMemoryType )
+        if (!hasLogicalType || !hasMemoryType )
           throw new BadRequestError('Do not have the right');
         //create new assessment
         await this.assessmentRepository.createbyName(hr.id, name,  start_date, end_date)
@@ -54,7 +54,7 @@ class AssessmentController extends BaseController {
         const link = 'Padtalent/invite/' + assessment.id
         await this.assessmentRepository.update({link: link},{where:{id: assessment.id}})
         //insert new assessment's game types 
-        if(visual)
+        if(logical)
         await this.assessment_game_typeRepository.create({assessment_id: assessment.id, game_type_id: 1})
         if(memory)
         await this.assessment_game_typeRepository.create({assessment_id: assessment.id, game_type_id: 2})
@@ -75,9 +75,9 @@ class AssessmentController extends BaseController {
     try {
         const assessDto: AsssessmentDto = req.body;
         const hr = req.hr
-        const {name, visual, memory, start_date, end_date} = assessDto;
+        const {name, logical, memory, start_date, end_date} = assessDto;
         //res.json({hr_id: hr.id, name: assessDto.name})
-        if(visual)
+        if(logical)
         await this.assessment_game_typeRepository.findOrCreateByCondition({assessment_id: req.params.id, game_type_id: 1})
         if(memory)
         await this.assessment_game_typeRepository.findOrCreateByCondition({assessment_id: req.params.id, game_type_id: 2})

@@ -1,6 +1,7 @@
 enum GameType {
-    memory,
-    visual,
+    logical = 1,
+    memory = 2,
+    
   }
   
   export default GameType;
