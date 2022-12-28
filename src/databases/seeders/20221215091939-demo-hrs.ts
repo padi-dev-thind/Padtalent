@@ -13,7 +13,7 @@ module.exports = {
       logo:'logo',
       company_industry: 'tech',
       company_size: 40,
-      is_admin:true,
+      is_admin: true,
       created_at: new Date(),
       updated_at: new Date()
     },

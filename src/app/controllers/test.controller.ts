@@ -3,8 +3,7 @@ import CandidateRepository from '@repositories/candidate.repository';
 import TestRepository from '@repositories/test.repository';
 import AssessmentRepository from '@repositories/assessment.repository';
 import { BaseController } from './base.controller';
-import { Authorized, UseBefore, BadRequestError, CurrentUser, Body, Get, JsonController, Post, Req, Res, Delete, Put } from 'routing-controllers';
-import { AuthMiddleware } from '@middlewares/auth.middleware';
+import { Authorized, UseBefore,Get, JsonController, Req, Res } from 'routing-controllers';
 import { Service } from 'typedi';
 import { AuthRequest } from '@interfaces/response.interface';
 import { CandidateMiddleware } from '@middlewares/candidate.middleware';
@@ -18,7 +17,6 @@ import Memory_questionsRepository from '@repositories/memory_questions.repositor
 import Logical_questionsRepository from '@repositories/logical_questions.repository';
 import Logical_question from '@models/entities/logical_questions';
 import Logical_question_test from '@models/entities/logical_questions_test';
-import { toNumber } from '@lib/env/utils';
 import Memory_question from '@models/entities/memory_questions';
 import Memory_question_test from '@models/entities/memory_questions_test';
 
@@ -47,23 +45,27 @@ class TestController extends BaseController {
   @UseBefore(CandidateMiddleware)
   @Get('/list') //create when a test is not exist
   async getTests(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    const that = this
     try {
       const assessment_game_types = await this.assessment_game_typeRepository
         .getAll({where:{assessment_id: req.assessment.id}})
-
+      
       const tests = await Promise.all(assessment_game_types.map(test_filter))
 
       async function test_filter(test_type){
         const test = await Test.findOne({where:{candidate_id: req.candidate.id,
                                                 assessment_id: req.assessment.id,
-                                                game_type_id: GameType.logical
+                                                game_type_id: test_type.game_type_id
                                         }})
         let gameType
+        let total_time
         if(test_type.game_type_id == GameType.logical){
           gameType = "logical"
+          total_time = 90
         } 
         else if(test_type.game_type_id == GameType.memory){
           gameType = "memory"
+          total_time = 100
         }
         if (test)
             return ({
@@ -73,80 +75,82 @@ class TestController extends BaseController {
               status: test.status
             })
         else {
-          // if test is not created => create here 
-          //logic creation:]
-          let newtest
+          // // if test is not created => create here 
+          // //logic creation:]
+          // let newtest
 
-          // create logical test
-          if (test_type.game_type_id == GameType.logical){
-              newtest = await Test.create({
-              game_type_id: test_type.game_type_id, 
-              candidate_id: req.candidate.id,
-              assessment_id: req.assessment.id,
-              total_time: 90,
-              remaining_time: 90,
-              number_of_questions: 10,
-              status: "not start"
-              })
+          // // create logical test
+          // if (test_type.game_type_id == GameType.logical){
+          //     newtest = await Test.create({
+          //     game_type_id: test_type.game_type_id, 
+          //     candidate_id: req.candidate.id,
+          //     assessment_id: req.assessment.id,
+          //     total_time: 90,
+          //     remaining_time: 90,
+          //     number_of_questions: 10,
+          //     status: "not start"
+          //     })
 
-            const yes_data = await Logical_question.findAndCountAll({where:{answer:'yes'},offset:0,limit:100})
-            const yes_questions_all = yes_data.rows
-            const no_data = await Logical_question.findAndCountAll({where:{answer:'no'},offset:0,limit:100})
-            const no_questions_all = no_data.rows
-            //test 10 question in a test 5 yes and 5 no
-            //add to the logical_questions_tests table
+          //   const yes_data = await Logical_question.findAndCountAll({where:{answer:'yes'},offset:0,limit:100})
+          //   const yes_questions_all = yes_data.rows
+          //   const no_data = await Logical_question.findAndCountAll({where:{answer:'no'},offset:0,limit:100})
+          //   const no_questions_all = no_data.rows
+          //   //test 10 question in a test 5 yes and 5 no
+          //   //add to the logical_questions_tests table
             
-            const suffle_yes_questions = yes_questions_all.sort(()=>0.5 - Math.random())
-            const random_yes_questions = suffle_yes_questions.slice(0,4)
+          //   const suffle_yes_questions = yes_questions_all.sort(()=>0.5 - Math.random())
+          //   const random_yes_questions = suffle_yes_questions.slice(0,4)
 
-            const suffle_no_questions = no_questions_all.sort(()=>0.5 - Math.random())
-            const random_no_questions = suffle_no_questions.slice(0,4)
+          //   const suffle_no_questions = no_questions_all.sort(()=>0.5 - Math.random())
+          //   const random_no_questions = suffle_no_questions.slice(0,4)
 
-            //add to logical_question_test table
-            let count = 1
-            for(const question of random_yes_questions){
-              await Logical_question_test.create({
-                                            logical_question_id: question.id,
-                                            test_id: newtest.id,
-                                            question_number: count 
-                                          })
-              count++
-            }
+          //   //add to logical_question_test table
+          //   let count = 1
+          //   for(const question of random_yes_questions){
+          //     await Logical_question_test.create({
+          //                                   logical_question_id: question.id,
+          //                                   test_id: newtest.id,
+          //                                   question_number: count 
+          //                                 })
+          //     count++
+          //   }
 
-            for(const question of random_no_questions){
-              await Logical_question_test.create({
-                                            logical_question_id: question.id,
-                                            test_id: newtest.id,
-                                            question_number: count 
-                                          })
-            count++                             
-            }
-          } 
+          //   for(const question of random_no_questions){
+          //     await Logical_question_test.create({
+          //                                   logical_question_id: question.id,
+          //                                   test_id: newtest.id,
+          //                                   question_number: count 
+          //                                 })
+          //   count++                             
+          //   }
+          // } 
 
-          // create memory test
-          if (test_type.game_type_id == GameType.memory){
-            newtest = await Test.create({
-            game_type_id: test_type.game_type_id, 
-            candidate_id: req.candidate.id,
-            assessment_id: req.assessment.id,
-            total_time: 100,
-            remaining_time: 100,
-            number_of_questions: 10,
-            status: "not start"
-            })
-            for (let i = 1; i <= 10; i++){
-              const question = await Memory_question.findOne({where:{level: i}})
-              //add to Memory_question_test
-              await Memory_question_test.create({
-                                                  memory_question_id: question.id,
-                                                  test_id: newtest.id,
-                                                  question_number: i 
-              })
-            }
-          }
+          // // create memory test
+          // if (test_type.game_type_id == GameType.memory){
+          //   newtest = await Test.create({
+          //   game_type_id: test_type.game_type_id, 
+          //   candidate_id: req.candidate.id,
+          //   assessment_id: req.assessment.id,
+          //   total_time: 100,
+          //   remaining_time: 100,
+          //   number_of_questions: 10,
+          //   status: "not start"
+          //   })
+          //   for (let i = 1; i <= 10; i++){
+          //     const question = await Memory_question.findOne({where:{level: i}})
+          //     //add to Memory_question_test
+          //     await Memory_question_test.create({
+          //                                         memory_question_id: question.id,
+          //                                         test_id: newtest.id,
+          //                                         question_number: i 
+          //     })
+          //   }
+          // }
+          
           return({
+
               test_type: gameType,
-              test_time: newtest.total_time,
+              test_time: total_time,
               result: null,
               status: "not start"
           })

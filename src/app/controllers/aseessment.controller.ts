@@ -77,19 +77,21 @@ class AssessmentController extends BaseController {
         const hr = req.hr
         const {name, logical, memory, start_date, end_date} = assessDto;
         //res.json({hr_id: hr.id, name: assessDto.name})
-        if(logical)
-        await this.assessment_game_typeRepository.findOrCreateByCondition({assessment_id: req.params.id, game_type_id: 1})
-        if(memory)
-        await this.assessment_game_typeRepository.findOrCreateByCondition({assessment_id: req.params.id, game_type_id: 2})
-
-        await this.assessmentRepository.update(
+      
+        const updateAss = await this.assessmentRepository.update(
           {name: name,  start_date: start_date, end_date: end_date},
           {where:{
             id: req.params.id,
           }})
 
+        if(logical)
+        await this.assessment_game_typeRepository.findOrCreateByCondition({where:{assessment_id: req.params.id, game_type_id: 1}})
+        if(memory)
+        await this.assessment_game_typeRepository.findOrCreateByCondition({where:{assessment_id: req.params.id, game_type_id: 2}})
+  
+
         return this.setData(
-            'Update assessment successfully'
+          updateAss
           )
             .setMessage('Success')
             .responseSuccess(res);
@@ -104,7 +106,7 @@ class AssessmentController extends BaseController {
   async delete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
         await this.assessmentRepository.deleteById(req.params.id)
-        
+  
         return this.setData(
             'Delete assessment successfully'
           )
