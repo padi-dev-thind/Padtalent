@@ -39,6 +39,12 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      level: 7,
+      data: "<><>>>>",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
       level: 8,
       data: "<>><><><",
       created_at: new Date(),

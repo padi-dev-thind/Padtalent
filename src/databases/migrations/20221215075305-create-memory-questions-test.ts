@@ -17,7 +17,7 @@ module.exports = {
           key: 'id'
         }
       },
-      question_id: {
+      memory_question_id: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
@@ -25,8 +25,12 @@ module.exports = {
           key: 'id'
         }
       },
+      candidate_answer: {
+        allowNull: true,
+        type: Sequelize.STRING(100),
+      },
       question_number: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.INTEGER
       },
       status:{

@@ -1,4 +1,4 @@
-import { Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { AutoIncrement, Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 import Assessment from './assessments'
 import Candidate from './candidates'
 
@@ -6,8 +6,8 @@ import Candidate from './candidates'
   tableName: 'candidates_assessments',
 })
 export default class Candidate_assessment extends Model<Candidate_assessment> {
-
   @PrimaryKey
+  @AutoIncrement
   @Column
   id!: number
 
@@ -24,6 +24,7 @@ export default class Candidate_assessment extends Model<Candidate_assessment> {
     allowNull: false,
     field: 'game_type_id'
   })
+  
   @Column
   game_type_id!: number
 

@@ -38,7 +38,8 @@ module.exports = {
         type: Sequelize.STRING(20),
         validate:{
           isIn: [['completed', 'in progress','not start']]
-        }
+        },
+        defaultValue:'not start'
       },
       remaining_time: {
         allowNull: false,

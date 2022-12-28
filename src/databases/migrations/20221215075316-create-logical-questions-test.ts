@@ -17,7 +17,7 @@ module.exports = {
           key: 'id'
         }
       },
-      question_id: {
+      logical_question_id: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
@@ -26,7 +26,7 @@ module.exports = {
         }
       },
       question_number: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.INTEGER
       },
       candidate_answer: {
