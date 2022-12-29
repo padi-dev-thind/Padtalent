@@ -56,9 +56,9 @@ class AuthController extends BaseController {
     try {
       const loginDto: CandidateLoginDto = req.body;
       const email = loginDto.email  
-      const candidate = await this.candidateRepository.findOrCreateByCondition({where:{email: email}});
+      const candidate = await this.candidateRepository.findByCondition({where:{email: email}});
       if (candidate){
-        const accessToken = createCandidateAccessToken(candidate[0], toNumber(req.params.id) );
+        const accessToken = createCandidateAccessToken(candidate, toNumber(req.params.id) );
         // Save to redis
         //setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
         return this.setData({
@@ -68,7 +68,7 @@ class AuthController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
       } else {
-        throw new BadRequestError('Errors');
+        throw new BadRequestError('Wrong candidate credentials');
       }
     } catch (error) {
       return this.setStack(error.stack).setMessage('Error').responseErrors(res);
