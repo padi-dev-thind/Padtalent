@@ -43,7 +43,7 @@ class TestController extends BaseController {
 
   @Authorized()
   @UseBefore(CandidateMiddleware)
-  @Get('/list') //create when a test is not exist
+  @Get('/list') 
   async getTests(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     const that = this
     try {

@@ -18,31 +18,37 @@ import { client as RedisClient} from '@services/redis'
 import { Action } from 'routing-controllers'
 import { verifyToken } from '@utils/tokenHandler'
 import { env } from '@env'
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 class App {
   public app: express.Application = express()
   public env: string
   public port: string | number
-
+  public userIdMap: object
+  public httpServer : any
+  public io : any
   constructor() {
     this.env = env.node || 'development'
     this.port = env.app.port || 3000
-
+    this.httpServer = createServer(this.app);
+    this.io = new Server(this.httpServer, { /* options */ });
     this.connectToDatabase()
     this.initializeMiddlewares()
     this.initializeRoutes()
     this.initializeSwagger()
     this.initializeErrorHandling()
+    this.socketConection()
     // this.register404Page();
   }
 
   public listen() {
-    this.app.listen(this.port, async () => {
+    const httpServer = createServer(this.app);
+    httpServer.listen(this.port, async () => {
       //await RedisClient.connect()
       logger.info(`=================================`)
       logger.info(`======= ENV: ${this.env} =======`)
       logger.info(`🚀 App listening on the port ${this.port}`)
-      logger.info(`🚀 Redis listening on the port ${6379}`)
       logger.info(`=================================`)
     })
   }
@@ -55,6 +61,8 @@ class App {
     DB.sequelize.authenticate()
     // DB.sequelize.sync({ force: false });
   }
+
+  
 
   private initializeMiddlewares() {
     this.app.use(morgan(env.log.format, { stream }))
@@ -88,6 +96,12 @@ class App {
       routePrefix: '/api',
       middlewares: [path.join(__dirname, '/app/middleware/*.ts')],
       controllers: [path.join(__dirname, '/app/controllers/*.ts')],
+    })
+  }
+  
+  private socketConection(){
+    this.io.on('connection', (socket) => {
+      console.log(socket.id); 
     })
   }
 

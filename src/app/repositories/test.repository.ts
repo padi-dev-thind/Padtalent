@@ -10,6 +10,13 @@ class TestRepository extends BaseRepository<Test> implements  TestRepositoryInte
   constructor(@ModelContainer(Test.tableName) Test: ModelCtor<Test>) {
     super(Test)
   }
+  async updateByCondition(object: Object, condition: any): Promise<any> {
+    return this.model.update(object,condition)   
+  }
+
+  async incrementResult(object: Object, condition: any): Promise<any> {
+    return this.model.increment(object,condition)   
+  }
 }
 
 export default TestRepository

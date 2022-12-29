@@ -40,7 +40,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING(20),
         validate:{
-          isIn:[['not answer','correct answer','wrong answer' ,'time out', 'skiped']]
+          isIn:[['not answer','answering','correct answer','wrong answer' ,'time out', 'skiped']]
         },
         defaultValue:'not answer'
       },
