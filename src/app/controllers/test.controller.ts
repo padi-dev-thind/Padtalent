@@ -7,7 +7,7 @@ import { Authorized, UseBefore,Get, JsonController, Req, Res } from 'routing-con
 import { Service } from 'typedi';
 import { AuthRequest } from '@interfaces/response.interface';
 import { CandidateMiddleware } from '@middlewares/candidate.middleware';
-import GameType from '@enum/game.enum';
+import {GameType} from '@enum/game.enum';
 import Assessment_game_typeRepository from '@repositories/assessment_game_type.repository';
 import Candidates_assessmentsRepository from '@repositories/candidates_assessments.repository';
 import Test from '@models/entities/tests';
@@ -75,78 +75,6 @@ class TestController extends BaseController {
               status: test.status
             })
         else {
-          // // if test is not created => create here 
-          // //logic creation:]
-          // let newtest
-
-          // // create logical test
-          // if (test_type.game_type_id == GameType.logical){
-          //     newtest = await Test.create({
-          //     game_type_id: test_type.game_type_id, 
-          //     candidate_id: req.candidate.id,
-          //     assessment_id: req.assessment.id,
-          //     total_time: 90,
-          //     remaining_time: 90,
-          //     number_of_questions: 10,
-          //     status: "not start"
-          //     })
-
-          //   const yes_data = await Logical_question.findAndCountAll({where:{answer:'yes'},offset:0,limit:100})
-          //   const yes_questions_all = yes_data.rows
-          //   const no_data = await Logical_question.findAndCountAll({where:{answer:'no'},offset:0,limit:100})
-          //   const no_questions_all = no_data.rows
-          //   //test 10 question in a test 5 yes and 5 no
-          //   //add to the logical_questions_tests table
-            
-          //   const suffle_yes_questions = yes_questions_all.sort(()=>0.5 - Math.random())
-          //   const random_yes_questions = suffle_yes_questions.slice(0,4)
-
-          //   const suffle_no_questions = no_questions_all.sort(()=>0.5 - Math.random())
-          //   const random_no_questions = suffle_no_questions.slice(0,4)
-
-          //   //add to logical_question_test table
-          //   let count = 1
-          //   for(const question of random_yes_questions){
-          //     await Logical_question_test.create({
-          //                                   logical_question_id: question.id,
-          //                                   test_id: newtest.id,
-          //                                   question_number: count 
-          //                                 })
-          //     count++
-          //   }
-
-          //   for(const question of random_no_questions){
-          //     await Logical_question_test.create({
-          //                                   logical_question_id: question.id,
-          //                                   test_id: newtest.id,
-          //                                   question_number: count 
-          //                                 })
-          //   count++                             
-          //   }
-          // } 
-
-          // // create memory test
-          // if (test_type.game_type_id == GameType.memory){
-          //   newtest = await Test.create({
-          //   game_type_id: test_type.game_type_id, 
-          //   candidate_id: req.candidate.id,
-          //   assessment_id: req.assessment.id,
-          //   total_time: 100,
-          //   remaining_time: 100,
-          //   number_of_questions: 10,
-          //   status: "not start"
-          //   })
-          //   for (let i = 1; i <= 10; i++){
-          //     const question = await Memory_question.findOne({where:{level: i}})
-          //     //add to Memory_question_test
-          //     await Memory_question_test.create({
-          //                                         memory_question_id: question.id,
-          //                                         test_id: newtest.id,
-          //                                         question_number: i 
-          //     })
-          //   }
-          // }
-          
           return({
 
               test_type: gameType,
@@ -163,7 +91,7 @@ class TestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -180,7 +108,7 @@ class TestController extends BaseController {
             .setMessage('Success')
             .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 

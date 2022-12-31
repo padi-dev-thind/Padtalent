@@ -57,7 +57,7 @@ class HrController extends BaseController {
             .setMessage('Success')
             .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -73,7 +73,7 @@ class HrController extends BaseController {
             .setMessage('Success')
             .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -92,7 +92,7 @@ class HrController extends BaseController {
             .setMessage('Success')
             .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 

@@ -9,8 +9,8 @@ export enum GameTotalTime {
   }
 
 export enum NumberOfQuestionGame {
-    logical = 20,
-    memory = 25,
+    logical = 10,
+    memory = 10,
   }
   
 
