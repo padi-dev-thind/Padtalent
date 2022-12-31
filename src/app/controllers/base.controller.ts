@@ -23,7 +23,7 @@ export class BaseController {
 
   public setData<T>(data: T): this {
     this.data = data
-
+    this.setStack("stack")
     return this
   }
 

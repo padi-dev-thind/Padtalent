@@ -10,7 +10,7 @@ export class LogicalQuestionDto {
   @Expose()
   @IsNotEmpty()
   @IsNumber()
-  logical_question_id: number
+  question_number: number
 
   @Expose()
   @IsNotEmpty()
@@ -29,7 +29,7 @@ export class MemoryQuestionDto {
   @Expose()
   @IsNotEmpty()
   @IsNumber()
-  logical_question_id: number
+  question_number: number
 
   @Expose()
   @IsNotEmpty()

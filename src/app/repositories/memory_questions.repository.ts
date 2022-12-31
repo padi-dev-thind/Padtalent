@@ -1,4 +1,4 @@
-import Memory_questions from '@models/entities/memory_questions_test'
+import Memory_questions from '@models/entities/memory_questions'
 import { Service } from 'typedi'
 import { ModelCtor } from 'sequelize-typescript'
 import { BaseRepository } from './base.repository'
