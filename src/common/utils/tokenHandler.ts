@@ -16,7 +16,7 @@ const createAccessToken = (Hr: Hr, isAdmin: boolean): string => {
   );
 };
 
-const createCandidateAccessToken = (candidate: Candidate, assessemnt_id: number): string => {
+const createCandidateAccessToken = (candidate: Candidate, assessemnt_id: string): string => {
   return jwt.sign(
     {
       candidate_id: candidate.id,

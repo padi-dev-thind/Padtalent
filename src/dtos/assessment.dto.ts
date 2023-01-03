@@ -1,7 +1,6 @@
 import { Expose } from 'class-transformer';
 import { Allow, IsNotEmpty, IsNumber, IsString, IsBoolean } from 'class-validator';
 import { AllowNull } from 'sequelize-typescript';
-import GameType from '@enum/game.enum';
 
 export class AsssessmentDto {
   @Expose()
@@ -10,14 +9,7 @@ export class AsssessmentDto {
   name: string;
 
   @Expose()
-  @IsNotEmpty()
-  @IsBoolean()
-  logical: boolean;
-
-  @Expose()
-  @IsNotEmpty()
-  @IsBoolean()
-  memory: boolean;
+  game_types: string;
 
   @Expose()
   @AllowNull

@@ -8,14 +8,17 @@ import { Service } from 'typedi';
 import {createCandidateAccessToken, createAccessToken, createRefreshToken, verifyToken } from '@utils/tokenHandler';
 import * as bcrypt from 'bcrypt'
 import { toNumber } from '@lib/env';
+import Candidates_assessmentsRepository from '@repositories/candidates_assessments.repository';
 
 
 
 @JsonController('/auth')
 @Service()
 class AuthController extends BaseController {
-  constructor(protected authRepository: HrRepository,
-              protected candidateRepository: CandidateRepository
+  constructor(
+    protected authRepository: HrRepository,
+    protected candidateRepository: CandidateRepository,
+    protected candidates_assessmentsRepository: Candidates_assessmentsRepository,
     ) {
     super();
   }
@@ -25,17 +28,18 @@ class AuthController extends BaseController {
     try {
       const loginDto: LoginDto = req.body;
       const {name, password} = loginDto;
-      const data = await this.authRepository.findByName(name);
-      const hr = data;
+      const hr = await this.authRepository.findByName(name);
 
-      bcrypt.compare(password,hr.password)
-      if (await bcrypt.compare(password,hr.password)) {
+      let isMatch = false
+      if(hr){
+        isMatch =  await bcrypt.compare(password, JSON.parse(hr.password))
+      }
+      
+      if (isMatch) {
         const accessToken = createAccessToken(hr, false);
-        const refreshToken = createRefreshToken(hr, false);
 
         return this.setData({
-          accessToken,
-          refreshToken,
+          accessToken
         })
           .setCode(200)
           .setMessage('Success')
@@ -57,56 +61,37 @@ class AuthController extends BaseController {
       const loginDto: CandidateLoginDto = req.body;
       const email = loginDto.email  
       const candidate = await this.candidateRepository.findByCondition({where:{email: email}});
+      
+      let isSuccess = 1
       if (candidate){
-        const accessToken = createCandidateAccessToken(candidate, toNumber(req.params.id) );
-        // Save to redis
-        //setCacheExpire(`auth_refresh_address_${name}`, refreshToken, REFRESH_TTL);
-        return this.setData({
-          accessToken
-        })
-          .setCode(200)
-          .setMessage('Success')
-          .responseSuccess(res);
+        const candidate_ass = await this.candidates_assessmentsRepository.findByCondition(
+          {
+            where:
+            {
+              candidate_id: candidate.id,
+              assessment_id: req.params.id   
+            }
+        });
+        if(!candidate_ass){
+          isSuccess = 0
+          throw new BadRequestError('Wrong candidate credentials');
+        }
+        const accessToken = createCandidateAccessToken(candidate, req.params.id );
+        if(isSuccess)
+          return this.setData({
+            accessToken
+          })
+            .setCode(200)
+            .setMessage('Success')
+            .responseSuccess(res);
       } else {
         throw new BadRequestError('Wrong candidate credentials');
       }
     } catch (error) {
-      return this.setStack(error.stack).setMessage('Error').responseErrors(res);
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message).responseErrors(res);
     }
   }
 
-//   @Post('/refresh')
-//   async refresh(@Req() req: Request, @Res() res: Response, next: NextFunction) {
-//     try {
-//       const { accessToken, refreshToken } = req.body;
-//       const decryptAccess = (await verifyToken(accessToken)) as IAccessToken;
-//       const address = decryptAccess.address;
-//       const oldRefresh = await getCacheExpire(`auth_refresh_address_${address}`);
-//       if (JSON.parse(oldRefresh?.toLowerCase() as string) == refreshToken.toLowerCase()) {
-//         const data = await this.authRepository.findByAddress(address);
-//         const user = data;
-//         const newAccessToken = createAccessToken(user);
-//         const newRefreshToken = createRefreshToken(user);
-
-//         // set refresh to redis
-//         setCacheExpire(`auth_refresh_address_${address}`, newRefreshToken, REFRESH_TTL);
-
-//         return this.setData({
-//           accessToken: newAccessToken,
-//           refreshToken: newRefreshToken,
-//         })
-//           .setCode(200)
-//           .setMessage('Success')
-//           .responseSuccess(res);
-//       } else {
-//         throw new BadRequestError('Wrong Tokens');
-//       }
-//     } catch (error) {
-//       return this.setCode(error?.status || 500)
-//         .setMessage(error?.message || 'Internal server error')
-//         .responseErrors(res);
-//     }
-//   }
 }
 
 export default AuthController;

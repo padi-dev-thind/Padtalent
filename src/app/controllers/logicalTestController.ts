@@ -15,7 +15,6 @@ import { CandidateMiddleware } from '@middlewares/candidate.middleware';
 import {GameTotalTime, GameType, NumberOfQuestionGame }from '@enum/game.enum';
 import { LogicalQuestionDto } from 'dtos/question.dto';
 import { toNumber } from '@lib/env/utils';
-import { json } from 'sequelize';
 
 
 
@@ -378,7 +377,7 @@ class logicalTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 
@@ -419,7 +418,7 @@ class logicalTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 }

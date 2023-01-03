@@ -1,4 +1,4 @@
-import { AutoIncrement, Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { AutoIncrement, Column, CreatedAt, DataType, DeletedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 import Assessment from './assessments'
 import Candidate from './candidates'
 
@@ -7,9 +7,12 @@ import Candidate from './candidates'
 })
 export default class Candidate_assessment extends Model<Candidate_assessment> {
   @PrimaryKey
-  @AutoIncrement
-  @Column
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  }
+  )
+  id!: string
 
   @Column
   @ForeignKey(() => Assessment)
@@ -17,17 +20,15 @@ export default class Candidate_assessment extends Model<Candidate_assessment> {
     allowNull: false,
     field: 'assessment_id'
   })
-  assessment_id!: number
+  assessment_id!: string
 
   @ForeignKey(() => Candidate)
   @Column({
     allowNull: false,
-    field: 'game_type_id'
+    field: 'candidate_id'
   })
+  candidate_id: string
   
-  @Column
-  game_type_id!: number
-
   @CreatedAt
   @Column
   createdAt!: Date
@@ -35,4 +36,8 @@ export default class Candidate_assessment extends Model<Candidate_assessment> {
   @UpdatedAt
   @Column
   updatedAt!: Date
+
+  @DeletedAt
+  @Column
+  deleted_at!: Date
 }

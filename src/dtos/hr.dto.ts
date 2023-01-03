@@ -1,7 +1,6 @@
 import { Expose } from 'class-transformer';
 import { Allow, IsNotEmpty, IsNumber, IsString, IsBoolean } from 'class-validator';
 import { AllowNull } from 'sequelize-typescript';
-import GameType from '@enum/game.enum';
 
 export class HrDto {
   @Expose()
@@ -44,8 +43,6 @@ export class HrDto {
   email: string;
 
   @Expose()
-  logical: boolean;
+  game_types: string;
 
-  @Expose()
-  memory: boolean;
 }

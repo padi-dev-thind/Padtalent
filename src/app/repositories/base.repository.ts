@@ -47,12 +47,24 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
     return this.model.create(object)
   }
 
+  async bulkCreate(object: any): Promise<M[]> {
+    return this.model.bulkCreate(object)
+  }
+
   async createWithAssociation(object: any, association: any) {
     return this.model.create(object, association);
   }
 
   async deleteById(id: any): Promise<number> {
     return this.model.destroy({ where: { id: id } });
+  }
+
+  async delete(object: any): Promise<number> {
+    return this.model.destroy(object);
+  }
+
+  async restore(object: any): Promise<void> {
+    return this.model.restore(object);
   }
 
   async update(object: Object, condition: any): Promise<any> {

@@ -20,6 +20,7 @@ import { verifyToken } from '@utils/tokenHandler'
 import { env } from '@env'
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { expressjwt} from 'express-jwt'
 
 class App {
   public app: express.Application = express()
@@ -74,7 +75,18 @@ class App {
     this.app.use(express.urlencoded({ extended: true }))
     this.app.use(cookieParser())
     this.app.use(express.static(path.join(__dirname, '/public')))
+    // this.app.use(
+    //   expressjwt({
+    //   secret: Buffer.from("shhhhhhared-secret", "base64"),
+    //   algorithms: ["HS256"],
+
+    //   }).unless({
+    //   //@ pass api without validating
+    //   path: ["/api/assessment/1/send-email"]
+    // }));
   }
+
+
 
   private initializeRoutes() {
     useContainer(Container)

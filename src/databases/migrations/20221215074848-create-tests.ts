@@ -4,10 +4,10 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('tests', {
       id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
       },
       game_type_id: {
         allowNull: false,
@@ -19,7 +19,7 @@ module.exports = {
       },
       candidate_id: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         references: {
           model: 'candidates',
           key: 'id'
@@ -27,7 +27,7 @@ module.exports = {
       },
       assessment_id: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         references: {
           model: 'assessments',
           key: 'id'
@@ -37,7 +37,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING(20),
         validate:{
-          isIn: [['completed', 'in progress','not start']]
+          isIn: [['completed', 'in progress','not start','archieved']]
         },
         defaultValue:'not start'
       },
@@ -55,8 +55,9 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       result: {
-        allowNull: true,
-        type: Sequelize.INTEGER
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        defaultValue: 0
       },
       start_time: {
         allowNull: true,
@@ -74,7 +75,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       },
-      deletedAt: {
+      deleted_at: {
         allowNull: true,
         type: Sequelize.DATE
       }
