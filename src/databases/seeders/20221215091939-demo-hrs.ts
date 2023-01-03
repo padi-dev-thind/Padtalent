@@ -4,9 +4,9 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.bulkInsert('hrs', [{
-      id:0,
-      name: 'hr1',
-      password: "$2b$10$RLommFfZxVsAg.HlUET67OWeINWJehYXibxAHmQMYhwdp81Zyrrzq" ,//pass
+      id: "1f1414f7-d5f5-42c4-b59c-35e3d16b634d",
+      name: 'admin',
+      password: "\"$2b$10$gaob4ggaDYOGh9F3MgBCEOvcFDN7le25hbyM3VKoqveCzU7NSlBX2\"" ,//pass
       email: 'hr@1',
       role: 'hr',
       company: 'pad',
@@ -18,9 +18,9 @@ module.exports = {
       updated_at: new Date()
     },
     {
-      id:2,
+      id: "e1725faa-ef59-427d-980e-4d4dc2ee8388",
       name: 'hr2',
-      password: "$2b$10$RLommFfZxVsAg.HlUET67OWeINWJehYXibxAHmQMYhwdp81Zyrrzq" ,//pass,
+      password: "\"$2b$10$gaob4ggaDYOGh9F3MgBCEOvcFDN7le25hbyM3VKoqveCzU7NSlBX2\"" ,//pass,
       email: 'hr@2',
       role: 'hr',
       company: 'pad',
@@ -31,9 +31,9 @@ module.exports = {
       updated_at: new Date()
     },
     {
-      id:3,
+      id: "170a977a-74fc-4c34-abac-d0d4fb176a92",
       name: 'hr3',
-      password: "$2b$10$RLommFfZxVsAg.HlUET67OWeINWJehYXibxAHmQMYhwdp81Zyrrzq" ,//pass,
+      password: "\"$2b$10$gaob4ggaDYOGh9F3MgBCEOvcFDN7le25hbyM3VKoqveCzU7NSlBX2\"" ,//pass,
       email: 'hr@3',
       role: 'hr',
       company:' pad',
@@ -44,9 +44,9 @@ module.exports = {
       updated_at: new Date()
     },
     {
-      id:4,
+      id: "599fb02d-7f5a-436e-8873-683f70dd606b",
       name: 'hr4',
-      password: "$2b$10$RLommFfZxVsAg.HlUET67OWeINWJehYXibxAHmQMYhwdp81Zyrrzq" ,//pass,
+      password: "\"$2b$10$gaob4ggaDYOGh9F3MgBCEOvcFDN7le25hbyM3VKoqveCzU7NSlBX2\"" ,//pass,
       email: 'hr@4',
       role: 'hr',
       company: 'pad',

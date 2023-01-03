@@ -1,13 +1,16 @@
-import { AutoIncrement, Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { AutoIncrement, Column, CreatedAt, DataType, DeletedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 
 @Table({
   tableName: 'memory_questions',
 })
 export default class Memory_question extends Model<Memory_question> {
   @PrimaryKey
-  @AutoIncrement
-  @Column
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  }
+  )
+  id!: string
 
   @Column
   level!: number
@@ -22,4 +25,8 @@ export default class Memory_question extends Model<Memory_question> {
   @UpdatedAt
   @Column
   updated_at!: Date
+
+  @DeletedAt
+  @Column
+  deleted_at!: Date
 }

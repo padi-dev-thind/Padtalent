@@ -1,22 +1,25 @@
-import { Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt, AutoIncrement } from 'sequelize-typescript'
+import { Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt, AutoIncrement, DataType, DeletedAt } from 'sequelize-typescript'
 
 @Table({
   tableName: 'tests',
 })
 export default class Test extends Model<Test> {
   @PrimaryKey
-  @AutoIncrement
-  @Column
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  }
+  )
+  id!: string
 
   @Column
   game_type_id!: number
 
   @Column
-  candidate_id!: number
+  candidate_id!: string
   
   @Column
-  assessment_id!: number
+  assessment_id!: string
 
   @Column
   total_time!: number
@@ -46,4 +49,8 @@ export default class Test extends Model<Test> {
   @UpdatedAt
   @Column
   updated_at!: Date
+
+  @DeletedAt
+  @Column
+  deleted_at!: Date
 }

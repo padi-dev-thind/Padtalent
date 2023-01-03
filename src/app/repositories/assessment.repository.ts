@@ -11,7 +11,7 @@ class AssessmentRepository extends BaseRepository<Assessment> implements  Assess
     super(Assessment)
   }
 
-  async createbyName(hr_id: number, name: string, start_date?: Date, end_date?: Date): Promise<Assessment> {
+  async createbyName(hr_id: string, name: string, start_date?: Date, end_date?: Date): Promise<Assessment> {
     if (start_date && end_date)
         return this.create({hr_id: hr_id, hname: name, start_date: start_date, end_date: end_date})
     else if (start_date)

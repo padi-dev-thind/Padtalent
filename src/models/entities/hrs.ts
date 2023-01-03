@@ -1,17 +1,21 @@
-import { AutoIncrement, Column, CreatedAt, DataType, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { AutoIncrement, Column, CreatedAt, DataType, DeletedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 
 @Table({
   tableName: 'hrs',
 })
 export default class Hr extends Model<Hr> {
+  
   @PrimaryKey
-  @AutoIncrement
-  @Column
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  }
+  )
+  id!: string
 
   @Column
   name!: string
-
+  
   @Column
   logo!: string
 
@@ -30,9 +34,7 @@ export default class Hr extends Model<Hr> {
   @Column
   company_size!: string
 
-  @Column({
-    type: DataType.JSON
-  })
+  @Column
   password!: string
 
   @Column
@@ -45,4 +47,8 @@ export default class Hr extends Model<Hr> {
   @UpdatedAt
   @Column
   updated_at!: Date
+
+  @DeletedAt
+  @Column
+  deleted_at!: Date
 }

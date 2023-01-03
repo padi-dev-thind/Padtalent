@@ -1,4 +1,4 @@
-import { AutoIncrement, Column, CreatedAt, DataType, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { AutoIncrement, Column, CreatedAt, DataType, DeletedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 import Memory_question from './memory_questions'
 import Test from './tests'
 
@@ -7,9 +7,12 @@ import Test from './tests'
 })
 export default class Memory_question_test extends Model<Memory_question_test> {
   @PrimaryKey
-  @AutoIncrement
-  @Column
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  }
+  )
+  id!: string
 
   @Column
   @ForeignKey(() => Memory_question)
@@ -17,14 +20,14 @@ export default class Memory_question_test extends Model<Memory_question_test> {
     allowNull: false,
     field: 'memory_question_test'
   })
-  memory_question_id!: number
+  memory_question_id!: string
 
   @ForeignKey(() => Test)
   @Column({
     allowNull: false,
     field: 'test_id'
   })
-  test_id!: number
+  test_id!: string
 
   @Column
   candidate_answer!: string
@@ -42,5 +45,9 @@ export default class Memory_question_test extends Model<Memory_question_test> {
   @UpdatedAt
   @Column
   updated_at!: Date
+
+  @DeletedAt
+  @Column
+  deleted_at!: Date
 }
 

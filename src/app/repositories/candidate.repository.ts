@@ -17,5 +17,6 @@ class CandidateRepository extends BaseRepository<Candidate> implements Candidate
       raw: true
     })
   }
+
 }
 export default CandidateRepository

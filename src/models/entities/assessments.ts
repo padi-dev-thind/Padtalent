@@ -1,4 +1,4 @@
-import { AutoIncrement, Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { AutoIncrement, Column, CreatedAt, DataType, DeletedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 import Hr from '@models/entities/hrs'
 
 @Table({
@@ -6,12 +6,15 @@ import Hr from '@models/entities/hrs'
 })
 export default class Assessment extends Model<Assessment> {
   @PrimaryKey
-  @AutoIncrement
-  @Column
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  }
+  )
+  id!: string
 
   @Column
-  hr_id!: number
+  hr_id!: string
 
   @Column
   name!: string
@@ -32,4 +35,8 @@ export default class Assessment extends Model<Assessment> {
   @UpdatedAt
   @Column
   updated_at!: Date
+
+  @DeletedAt
+  @Column
+  deleted_at!: Date
 }
