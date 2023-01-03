@@ -1,4 +1,4 @@
-import { AutoIncrement, Column, CreatedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { AutoIncrement, Column, CreatedAt, DataType, DeletedAt, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
 import Logical_question from './logical_questions'
 import Test from './tests'
 
@@ -6,11 +6,13 @@ import Test from './tests'
   tableName: 'logical_questions_tests',
 })
 export default class Logical_question_test extends Model<Logical_question_test> {
-
   @PrimaryKey
-  @AutoIncrement
-  @Column
-  id!: number
+  @Column({
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  }
+  )
+  id!: string
 
   @Column
   @ForeignKey(() => Logical_question)
@@ -18,14 +20,14 @@ export default class Logical_question_test extends Model<Logical_question_test> 
     allowNull: false,
     field: 'logical_question_id'
   })
-  logical_question_id!: number
+  logical_question_id!: string
 
   @ForeignKey(() => Test)
   @Column({
     allowNull: false,
     field: 'test_id'
   })
-  test_id!: number
+  test_id!: string
 
   @Column
   candidate_answer!: string
@@ -38,9 +40,13 @@ export default class Logical_question_test extends Model<Logical_question_test> 
 
   @CreatedAt
   @Column
-  createdAt!: Date
+  created_at!: Date
 
   @UpdatedAt
   @Column
-  updatedAt!: Date
+  updated_at!: Date
+
+  @DeletedAt
+  @Column
+  deleted_at!: Date
 }

@@ -30,10 +30,9 @@ class CandidateController extends BaseController {
             .setMessage('Success')
             .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
-
 }
 
 export default CandidateController

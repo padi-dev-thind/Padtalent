@@ -4,10 +4,10 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('hrs', {
       id: {
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
       },
       name: {
         allowNull: false,
@@ -15,7 +15,7 @@ module.exports = {
       },
       password: {
         allowNull: false,
-        type: Sequelize.JSON
+        type: Sequelize.TEXT
       },
       email: {
         allowNull: true,
@@ -53,7 +53,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       },
-      deletedAt: {
+      deleted_at: {
         allowNull: true,
         type: Sequelize.DATE
       }

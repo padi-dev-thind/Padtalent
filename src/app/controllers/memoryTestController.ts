@@ -11,11 +11,10 @@ import Candidates_assessmentsRepository from '@repositories/candidates_assessmen
 import { AuthRequest } from '@interfaces/response.interface';
 import { CandidateMiddleware } from '@middlewares/candidate.middleware';
 import {GameTotalTime, GameType, NumberOfQuestionGame }from '@enum/game.enum';
-import { LogicalQuestionDto, MemoryQuestionDto } from 'dtos/question.dto';
+import { MemoryQuestionDto } from 'dtos/question.dto';
 import { toNumber } from '@lib/env/utils';
 import Memory_questionsRepository from '@repositories/memory_questions.repository';
 import Memory_questions_testsRepository from '@repositories/memory_questions_tests.repository';
-import { json } from 'sequelize';
 
 
 
@@ -123,7 +122,7 @@ class MemoryTestController extends BaseController {
         .setMessage('Success')
         .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 
@@ -162,7 +161,7 @@ class MemoryTestController extends BaseController {
   //       .setMessage('Success')
   //       .responseSuccess(res);
   //   } catch (error) {
-  //     return this.setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+  //     return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
   //   }
   // }
   
@@ -242,7 +241,7 @@ class MemoryTestController extends BaseController {
         .setMessage('Success')
         .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 
@@ -338,7 +337,7 @@ class MemoryTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 
@@ -379,7 +378,7 @@ class MemoryTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 }

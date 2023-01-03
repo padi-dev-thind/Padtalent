@@ -1,9 +1,11 @@
 'use strict';
-
+const { v4: uuidv4 } = require('uuid');
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    return queryInterface.bulkInsert('logical_questions', [{
+    return queryInterface.bulkInsert('logical_questions', [
+    {
+      id: uuidv4(),
       statement1: "s1",
       statement2: "s1",
       conclusion: "c1",
@@ -12,6 +14,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s2",
       statement2: "s2",
       conclusion: "c3",
@@ -19,6 +22,7 @@ module.exports = {
       created_at: new Date(),
       updated_at: new Date()
     },{
+      id: uuidv4(),
       statement1: "s3",
       statement2: "s3",
       conclusion: "c3",
@@ -27,6 +31,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s4",
       statement2: "s4",
       conclusion: "c4",
@@ -35,6 +40,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s5",
       statement2: "s5",
       conclusion: "c5",
@@ -43,6 +49,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s6",
       statement2: "s6",
       conclusion: "c6",
@@ -51,6 +58,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s7",
       statement2: "s7",
       conclusion: "c7",
@@ -59,6 +67,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s8",
       statement2: "s8",
       conclusion: "c8",
@@ -67,6 +76,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s9",
       statement2: "s9",
       conclusion: "c9",
@@ -75,6 +85,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s10",
       statement2: "s10",
       conclusion: "c10",
@@ -83,6 +94,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s11",
       statement2: "s11",
       conclusion: "c11",
@@ -91,6 +103,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s12",
       statement2: "s12",
       conclusion: "c12",
@@ -99,6 +112,7 @@ module.exports = {
       updated_at: new Date()
     },
     {
+      id: uuidv4(),
       statement1: "s13",
       statement2: "s13",
       conclusion: "c13",
