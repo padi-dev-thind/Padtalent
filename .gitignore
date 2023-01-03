@@ -103,6 +103,5 @@ dist
 # TernJS port file
 .tern-port
 
-.development.sqlite3
-
+.sqlite3
 fwet
