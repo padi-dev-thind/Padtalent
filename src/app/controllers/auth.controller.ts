@@ -48,7 +48,7 @@ class AuthController extends BaseController {
         throw new BadRequestError('Wrong credentials');
       }
     } catch (error) {
-      return this.setCode(error?.status || 500)
+      return this.setData({}).setCode(error?.status || 500)
         .setMessage(error?.message || 'Internal server error')
         .responseErrors(res);
     }
@@ -88,7 +88,7 @@ class AuthController extends BaseController {
         throw new BadRequestError('Wrong candidate credentials');
       }
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message).responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message).responseErrors(res);
     }
   }
 

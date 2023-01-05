@@ -41,6 +41,16 @@ class MemoryTestController extends BaseController {
     try {
       let isSuccess = 1
       let firstQuestion = null
+      //check if test had been created
+      const test = await this.testRepository.findByCondition({where:{
+        game_type_id: GameType.memory, 
+        candidate_id: req.candidate.id,
+        assessment_id: req.assessment.id
+      }})
+      if(test){
+        isSuccess = 0
+        throw new BadRequestError('the test had been created before')
+      }
       //create new test
       const newtest = await this.testRepository.create({
         game_type_id: GameType.memory, 
@@ -76,7 +86,7 @@ class MemoryTestController extends BaseController {
         .setMessage('Success')
         .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 
@@ -85,6 +95,7 @@ class MemoryTestController extends BaseController {
   @Get('/continue') //socket.on('disconnect', callback()); - client side
   async continue(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
+      let isShowedData = false
       const test = await this.testRepository.findByCondition({where:
         {
           candidate_id: req.candidate.id,
@@ -100,11 +111,69 @@ class MemoryTestController extends BaseController {
             status: "answering",
             test_id: test.id
           }})
-        if(question_raw)
-        recentQuestion = await this.memory_questionsRepository.findById(question_raw.memory_question_id)
+        if(question_raw){
+          isShowedData = question_raw.isShowedData
+          recentQuestion = await this.memory_questionsRepository.findById(question_raw.memory_question_id)
+        }
         else {
             isSuccess = 0
             throw new BadRequestError('can not find question or question was deleted');  
+        }
+      }
+      else{
+        isSuccess = 0
+        throw new BadRequestError('can not find question or question is answerd or question was deleted');  
+      }
+      if (isSuccess)
+        return this.setData( 
+          {
+            recentQuestion: recentQuestion,
+            test_result: test.result,
+            isShowedData: isShowedData,
+            remaining_time: test.remaining_time
+          }
+        )
+        .setMessage('Success')
+        .responseSuccess(res);
+    } catch (error) {
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+    }
+  }
+
+  @Authorized()
+  @UseBefore(CandidateMiddleware)
+  @Post('/ShowedData') //socket.on('disconnect', callback()); - client side
+  async setIsShowData(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+      let isShowData = false
+      const {question_number} = req.body
+      const test = await this.testRepository.findByCondition({where:
+        {
+          candidate_id: req.candidate.id,
+          assessment_id:req.assessment.id,
+          game_type_id: GameType.memory,
+          status: "in progress"
+        }})
+      let  isSuccess = 1
+      if(test){
+        const question_raw = await this.memory_questions_testsRepository.findByCondition({where:
+          {
+            question_number: question_number,
+            status: "answering",
+            test_id: test.id
+          }})
+        if(question_raw){
+          await this.memory_questions_testsRepository.update(
+            {isShowedData: true},
+            {where:
+              {
+                status: "answering",
+                test_id: test.id
+              }})
+        }
+        else {
+            isSuccess = 0
+            throw new BadRequestError('can not find question or question is answerd or question was deleted');  
         }
       }
       else{
@@ -113,135 +182,12 @@ class MemoryTestController extends BaseController {
       }
       if (isSuccess)
         return this.setData( 
-          {
-            recentQuestion: recentQuestion,
-            test_result: test.result,
-            remaining_time: test.remaining_time
-          }
+            "update successdully"     
         )
         .setMessage('Success')
         .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
-    }
-  }
-
-  // @Authorized()
-  // @UseBefore(CandidateMiddleware)
-  // @Post('/disconnect') //socket.on('disconnect', callback()); - client side
-  // async disconnetTest(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
-  //   try {
-  //     const test = await this.testRepository.findByCondition({where:{
-  //       candidate_id: req.candidate.id,
-  //       assessment_id:req.assessment.id,
-  //       game_type_id: GameType.memory,
-  //       status: "in progress"
-  //     }})
-  //     let isSuccess = 1
-  //     if(test){
-  //       const {remaining_time, question_number} = req.body
-  //       //check if question 
-  //       await this.memory_questions_testsRepository.update(
-  //         {status: 'answering'},
-  //         {where:{
-  //           question_number: question_number,
-  //           test_id: test.id
-  //         }})
-        
-  //     }
-  //     else{
-  //       isSuccess = 0
-  //       throw new BadRequestError('test not start or have been completed or assessment is deleted');  
-  //     }
-
-  //     if (isSuccess)
-  //      return this.setData( 
-  //           "updated successfully - user disconnected"
-  //       )
-  //       .setMessage('Success')
-  //       .responseSuccess(res);
-  //   } catch (error) {
-  //     return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
-  //   }
-  // }
-  
-  @Authorized()
-  @UseBefore(CandidateMiddleware)
-  @Get('/next-question') //socket.on('disconnect', callback()); - client side
-  async getNextQuestion(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
-    try {
-      const {recent_question_number} = req.body
-      const test = await this.testRepository.findByCondition(
-        {where:
-        {
-          candidate_id: req.candidate.id,
-          assessment_id:req.assessment.id,
-          game_type_id: GameType.memory,
-          status: "in progress"
-        }})
-      
-      let isSuccess = 1
-      let nextQuestion = null    
-      if(test){
-        //check if is the last question
-        if(toNumber(recent_question_number) === NumberOfQuestionGame.memory ) {
-          isSuccess = 0
-          throw new BadRequestError('it is the last question');
-        }
-        const next_question_number = toNumber(recent_question_number) + 1
-        //check if the recent question was answered
-        const recent_question = await this.memory_questions_testsRepository.findByCondition(
-          {where:
-          {
-            question_number: recent_question_number,
-            test_id: test.id,
-          }})
-        if(recent_question.status == 'not answer' || recent_question.status === 'answering' ){
-          isSuccess = 0
-          throw new BadRequestError('question haven\'t been answered yet');
-        }
-
-        //
-        const question_raw = await this.memory_questions_testsRepository.findByCondition(
-          {where:
-          {
-            question_number: next_question_number,
-            test_id: test.id,
-          }})
-        if(question_raw){
-          //get next question
-          nextQuestion = await this.memory_questionsRepository.findByCondition(
-            {where:{
-              id: question_raw.memory_question_id
-            }})
-          //update the status
-          await this.memory_questions_testsRepository.update(
-            {status: 'answering'},
-            {where:
-            {
-              memory_question_id: question_raw.memory_question_id,
-              test_id: test.id
-            }})
-        }
-        else {
-            isSuccess = 0
-            throw new BadRequestError('can not find question or question was deleted');  
-        }
-      }
-      else{
-        isSuccess = 0
-        throw new BadRequestError('test not start or have been completed or assessment is deleted');  
-      }
-      if(isSuccess)
-        return this.setData( 
-          {
-            nextQuestion: nextQuestion,
-          }
-        )
-        .setMessage('Success')
-        .responseSuccess(res);
-    } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 
@@ -251,7 +197,7 @@ class MemoryTestController extends BaseController {
   async getResultRecentQuestion(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const memoryQuestionDto: MemoryQuestionDto = req.body
-      const {remaining_time, candidate_answer, question_number} = memoryQuestionDto
+      const {candidate_answer} = memoryQuestionDto
       const test = await this.testRepository.findByCondition(
         {where:
         {
@@ -262,24 +208,34 @@ class MemoryTestController extends BaseController {
         }})
       
       let isSuccess = 1  
+      let nextQuestion = null
       let recentQuestion = null
       let status = 'wrong answer'
       let test_status = 'in progress'
       let new_test_result = null
-      if (question_number == NumberOfQuestionGame.memory) 
-        test_status = 'completed'
+      let question_number = 0
 
       if(test){
         new_test_result = test.result
-        const question_raw = await this.memory_questions_testsRepository.findByCondition(
+        const recentQuestion_raw = await this.memory_questions_testsRepository.findByCondition(
           {where:
           {
-            question_number: question_number,
             test_id: test.id,
             status: "answering"
+        }})
+        question_number = recentQuestion_raw.question_number
+        if (question_number == NumberOfQuestionGame.memory) 
+          test_status = 'completed'
+        const nextQuestion_raw = await this.memory_questions_testsRepository.findByCondition(
+          {where:
+          {
+            question_number: question_number + 1,
+            test_id: test.id,
           }})
-        if(question_raw){
-          recentQuestion = await this.memory_questionsRepository.findById(question_raw.memory_question_id)
+        if(recentQuestion_raw){
+          recentQuestion = await this.memory_questionsRepository.findById(recentQuestion_raw.memory_question_id)
+          if (nextQuestion_raw)
+            nextQuestion = await this.memory_questionsRepository.findById(nextQuestion_raw.memory_question_id)
           //check if answer is true
           console.log(recentQuestion.data)
           if(candidate_answer == 'skip'){
@@ -306,10 +262,18 @@ class MemoryTestController extends BaseController {
               test_id: test.id
             }
           })
+          //update the status
+          await this.memory_questions_testsRepository.update(
+            {status: 'answering'},
+            {where:
+            {
+              question_number: question_number + 1,
+              test_id: test.id
+          }})
+          //update test
           await this.testRepository.update(
             {
               result: new_test_result,
-              remaining_time: remaining_time,
               status: test_status // completed if answer is wrong or last question
             },
             {where:{
@@ -325,19 +289,30 @@ class MemoryTestController extends BaseController {
         isSuccess = 0
         throw new BadRequestError('test not start or have been completed or assessment is deleted');  
       }
+      let data = null
+      if(test_status == 'in progress')
+        data = {
+          nextQuestion: nextQuestion,
+          next_question_number: question_number + 1,
+          result: status,
+          new_test_result: new_test_result,
+          test_status: test_status
+      }
+      else if (test_status == 'completed'){
+        data =  {
+          result: status,
+          test_result: new_test_result,
+          test_status: test_status
+        }
+      }
       if (isSuccess)
         return this.setData( 
-          {
-            recentquestion: recentQuestion,
-            result: status,
-            test_status: test_status,
-            new_test_result: new_test_result
-          }
+            data
         )
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 
@@ -361,7 +336,6 @@ class MemoryTestController extends BaseController {
       if(test){
         await this.testRepository.update(
           {
-            remaining_time: remaining_time,
           },
           {where:{
             id: test.id
@@ -378,7 +352,7 @@ class MemoryTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 }

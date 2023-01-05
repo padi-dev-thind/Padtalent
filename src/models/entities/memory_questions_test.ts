@@ -38,6 +38,9 @@ export default class Memory_question_test extends Model<Memory_question_test> {
   @Column
   question_number!: number
 
+  @Column
+  isShowedData!: boolean 
+
   @CreatedAt
   @Column
   created_at!: Date

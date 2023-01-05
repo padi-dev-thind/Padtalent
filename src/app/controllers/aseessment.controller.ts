@@ -68,7 +68,7 @@ class AssessmentController extends BaseController {
               .setMessage('Success')
               .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -110,7 +110,7 @@ class AssessmentController extends BaseController {
               .setMessage('Success')
               .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -132,7 +132,7 @@ class AssessmentController extends BaseController {
           throw new BadRequestError('not found')
         }
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -149,7 +149,7 @@ class AssessmentController extends BaseController {
             .responseSuccess(res);
         
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -219,10 +219,14 @@ class AssessmentController extends BaseController {
     try {
         let isSuccess = 1
         const hr = req.hr
-        const assessment = await this.assessmentRepository.findById(req.params.id)
+        const assessment = await this.assessmentRepository.findByCondition({where:{id:req.params.id}})
+        if(!assessment){
+          isSuccess = 0
+          throw new BadRequestError('not found assessment');
+        }
         if(assessment.hr_id != hr.id){
           isSuccess = 0
-          throw new BadRequestError('this hr don t have the right to access this ruote');
+          throw new BadRequestError('this hr don t have the right to access this link');
         }
         if (assessment){
         if (isSuccess)
@@ -236,7 +240,7 @@ class AssessmentController extends BaseController {
           throw new BadRequestError('Error Assessment');
         }
     } catch (error) {
-      return this.setCode(error?.status || 500)
+      return this.setCode(error?.status || 500).setData({})
         .setMessage(error?.message || 'Internal server error')
         .responseErrors(res);
     }
@@ -247,11 +251,14 @@ class AssessmentController extends BaseController {
   @Post('/:id/send-email')
   async inviteByEmail(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
+      let isSuccess = 1
       const email = req.body.email
-
       await this.candidateRepository.create({email:email})
-      const assessment = await this.assessmentRepository.findByCondition({id: req.params.id})
-
+      const assessment = await this.assessmentRepository.findByCondition({where:{id: req.params.id}})
+      if(!assessment){
+        isSuccess = 0
+        throw new BadRequestError("not found assessment")
+      }
       var transporter =  nodemailer.createTransport({ // config mail server
         host: 'smtp.gmail.com',
         port: 465,
@@ -266,24 +273,27 @@ class AssessmentController extends BaseController {
       to: email,
       subject: 'Test inviatation',
       text: 'You have got a invite to test' ,
-      html: '<p>link: <a>' + assessment.link +'</a></p>'
+      html: 'link: <a>' + assessment.link +'</a>'
     }
-
-    transporter.sendMail(mainOptions, function(err, info){
+    let mg
+    transporter.sendMail(mainOptions, await function(err, info){
       if (err) {
-          console.log(err);
+          isSuccess = 0
+          throw new BadRequestError(err.message)
       } else {
           console.log('Message sent: ' +  info.response);
+          mg = 'Message sent: ' +  info.response
       }
-  });
-      
+    });
+    if (isSuccess)
       return this.setData( 
-            "invite successfully"
-          )
-            .setMessage('Success')
-            .responseSuccess(res);
+        mg
+      )
+        .setMessage('Success')
+        .responseSuccess(res);
+        
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -303,7 +313,7 @@ class AssessmentController extends BaseController {
             .setMessage('Success')
             .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 }

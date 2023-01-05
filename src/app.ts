@@ -20,7 +20,6 @@ import { verifyToken } from '@utils/tokenHandler'
 import { env } from '@env'
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { expressjwt} from 'express-jwt'
 
 class App {
   public app: express.Application = express()

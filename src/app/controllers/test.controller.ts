@@ -86,7 +86,7 @@ class TestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -103,7 +103,7 @@ class TestController extends BaseController {
             .setMessage('Success')
             .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -126,7 +126,7 @@ class TestController extends BaseController {
             throw new BadRequestError('Error Assessment')
           }
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -151,7 +151,7 @@ class TestController extends BaseController {
           throw new BadRequestError('not found');
         }
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 }

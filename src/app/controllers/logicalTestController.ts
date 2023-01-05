@@ -39,7 +39,18 @@ class logicalTestController extends BaseController {
   @Get('/start')
   async getAssessments(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
-      let firstQuestion = null
+      let isSuccess = 1
+      //check if test was created
+      const test = await this.testRepository.findByCondition({where:{
+        game_type_id: GameType.logical, 
+        candidate_id: req.candidate.id,
+        assessment_id: req.assessment.id
+        }})
+      if(test){
+        isSuccess = 0
+        throw new BadRequestError('the test had been created before')
+      }
+      //create new test
       const newtest = await this.testRepository.create({
         game_type_id: GameType.logical, 
         candidate_id: req.candidate.id,
@@ -51,7 +62,8 @@ class logicalTestController extends BaseController {
         start_time: new Date(),
         status: "in progress"
         })
-      
+
+      let firstQuestion = null
       const yes_data = await this.logical_questionsRepository.getByCondition({answer:'yes'},0,100)
       const yes_questions_all = yes_data.rows
       const no_data = await this.logical_questionsRepository.getByCondition({answer:'no'},0,100)
@@ -80,14 +92,14 @@ class logicalTestController extends BaseController {
         count++
       }
       firstQuestion = random_questions[0]
-    
-      return this.setData( 
-        firstQuestion
-      )
-        .setMessage('Success')
-        .responseSuccess(res);
+      if(isSuccess)
+        return this.setData( 
+          {firstQuestion}
+        )
+          .setMessage('Success')
+          .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -133,7 +145,7 @@ class logicalTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -165,87 +177,7 @@ class logicalTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
-    }
-  }
-  
-  @Authorized()
-  @UseBefore(CandidateMiddleware)
-  @Get('/next-question') //socket.on('disconnect', callback()); - client side
-  async getNextQuestion(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
-    try {
-      const {recent_question_number} = req.body
-      const test = await this.testRepository.findByCondition(
-        {where:
-        {
-          candidate_id: req.candidate.id,
-          assessment_id:req.assessment.id,
-          game_type_id: GameType.logical,
-          status: "in progress"
-        }})
-      let isSuccess = 1
-      let nextQuestion = null    
-      if(test){
-        //check if is the last question
-        if(toNumber(recent_question_number) === NumberOfQuestionGame.memory ) {
-          isSuccess = 0
-          throw new BadRequestError('it is the last question');
-        }
-         //check if the recent question was answered
-        const recent_question = await this.logical_questions_testsRepository.findByCondition(
-          {where:
-          {
-            question_number: toNumber(recent_question_number),
-            test_id: test.id,
-          }})
-        if(recent_question.status === 'not answer' || recent_question.status === 'answering'){
-          isSuccess = 0
-          throw new BadRequestError('recent question haven\'t been answered yet');
-        }
-        //
-        
-        const next_question_number = toNumber(recent_question_number) + 1
-        const question_raw = await this.logical_questions_testsRepository.findByCondition(
-          {where:
-          {
-            question_number: next_question_number,
-            test_id: test.id
-          }})
-        if(question_raw){
-          //get next question
-          nextQuestion = await this.logical_questionsRepository.findByCondition(
-            {where:{
-              id: question_raw.logical_question_id
-            }})
-          //update the status
-          await this.logical_questions_testsRepository.update(
-            {status: 'answering'},
-            {where:
-            {
-              logical_question_id: question_raw.logical_question_id,
-              test_id: test.id
-            }})
-        }
-        else {
-          isSuccess = 0
-          throw new BadRequestError('can not find question or question was deleted');  
-        }
-      }
-      else{
-        isSuccess = 0
-        throw new BadRequestError('test not start or have been completed or assessment is deleted');  
-      }
-      if (isSuccess)
-        return this.setData( 
-          {
-            nextQuestion: nextQuestion,
-            next_question_number: ( toNumber(recent_question_number) + 1)
-          }
-        )
-          .setMessage('Success')
-          .responseSuccess(res);
-    } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -255,33 +187,50 @@ class logicalTestController extends BaseController {
   async getResultRecentQuestion(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const logicalQuestionDto: LogicalQuestionDto = req.body
-      const {remaining_time, candidate_answer, question_number} = logicalQuestionDto
+      const {remaining_time, candidate_answer} = logicalQuestionDto
       const test = await this.testRepository.findByCondition(
         {where:
         {
           candidate_id: req.candidate.id,
           assessment_id:req.assessment.id,
+          game_type_id: GameType.logical,
           status: "in progress"
         }})
       let isSuccess = 1
+      let nextQuestion = null
       let recentQuestion = null
       let status = 'wrong answer'
       let reward = 0
       let new_test_result = null
       let test_status = 'in progress'
-      if (question_number == NumberOfQuestionGame.memory) 
-        test_status = 'completed'
+      let question_number = 0
+      let data = null
+      
       if(test){
         new_test_result = test.result
-        const question_raw = await this.logical_questions_testsRepository.findByCondition(
+        const recentQuestion_raw = await this.logical_questions_testsRepository.findByCondition(
           {where:
-          {
-            question_number: question_number,
+            {
             test_id: test.id,
             status: "answering"
           }})
-        if(question_raw){
-          recentQuestion = await this.logical_questionsRepository.findById(question_raw.logical_question_id)
+
+        question_number = recentQuestion_raw.question_number
+        //check if the recent question is the lat question
+        if (question_number == NumberOfQuestionGame.logical) 
+          test_status = 'completed'
+        //get the next question
+
+        const nextQuestion_raw = await this.logical_questions_testsRepository.findByCondition(
+          {where:
+          {
+            question_number: question_number + 1,
+            test_id: test.id,
+          }})
+        if(recentQuestion_raw){
+          recentQuestion = await this.logical_questionsRepository.findById(recentQuestion_raw.logical_question_id)
+          if(nextQuestion_raw)
+            nextQuestion = await this.logical_questionsRepository.findById(nextQuestion_raw.logical_question_id)
           //check if answer is true
           if(candidate_answer == 'skip'){
             status = 'skip'
@@ -305,11 +254,20 @@ class logicalTestController extends BaseController {
               test_id: test.id
             }
           })
+          //update the status of next question
+          await this.logical_questions_testsRepository.update(
+            {status: 'answering'},
+            {where:
+            {
+              question_number: question_number + 1,
+              test_id: test.id
+            }})
+          //update test result
           await this.testRepository.update(
             {
               result: new_test_result,
               remaining_time: remaining_time,
-              status: test_status // completed if answer is wrong or last question
+              status: test_status 
             },
             {where:{
               id: test.id
@@ -323,20 +281,32 @@ class logicalTestController extends BaseController {
       else{
         isSuccess = 0
         throw new BadRequestError('test not start or have been completed or assessment is deleted');  
+      } 
+      if(test_status == 'in progress')
+        data = {
+          nextQuestion: nextQuestion,
+          next_question_number: question_number + 1,
+          result: status,
+          new_test_result: new_test_result,
+          test_status: test_status
       }
-      if (isSuccess)
+      else if (test_status == 'completed'){
+        data =  {
+          result: status,
+          test_result: new_test_result,
+          test_status: test_status
+        }
+      }
+      if(isSuccess)
         return this.setData( 
           {
-            recentquestion: recentQuestion,
-            result: status,
-            new_test_result: new_test_result
+            data
           }
-          
         )
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
   
