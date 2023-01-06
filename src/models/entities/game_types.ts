@@ -15,6 +15,9 @@ export default class Game_type extends Model<Game_type> {
   @Column
   total_time!: number
 
+  @Column
+  description!: string
+
   @CreatedAt
   @Column
   created_at!: Date

@@ -136,6 +136,28 @@ class AssessmentController extends BaseController {
     }
   }
 
+  @UseBefore(AuthMiddleware)
+  @Delete('/hard-delete/:id')
+  async hardDelete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id
+        const assessment = await this.assessmentRepository.findById(id) 
+        if(assessment){
+          await this.assessmentRepository.delete({where:{id: id}, force: true})
+          return this.setData(
+              'Delete assessment successfully'
+            )
+              .setMessage('Success')
+              .responseSuccess(res);
+        }
+        else{
+          throw new BadRequestError('not found')
+        }
+    } catch (error) {
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+    }
+  }
+
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Post('/restore/:id')
@@ -273,7 +295,8 @@ class AssessmentController extends BaseController {
       to: email,
       subject: 'Test inviatation',
       text: 'You have got a invite to test' ,
-      html: 'link: <a>' + assessment.link +'</a>'
+      html:'<a href="https://' + assessment.link + '">click here to join the test</a>'
+
     }
     let mg
     transporter.sendMail(mainOptions, await function(err, info){
