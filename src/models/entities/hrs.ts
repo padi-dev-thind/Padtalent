@@ -1,4 +1,7 @@
-import { AutoIncrement, Column, CreatedAt, DataType, DeletedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import { AutoIncrement, BelongsToMany, Column, CreatedAt, DataType, DeletedAt, HasMany, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
+import Assessment from './assessments'
+import Game_type from './game_types'
+import Hrs_game_type from './hrs_game_types'
 
 @Table({
   tableName: 'hrs',
@@ -27,6 +30,18 @@ export default class Hr extends Model<Hr> {
 
   @Column
   company!: string
+
+  @HasMany(() => Assessment,{
+    onUpdate: "CASCADE",
+    onDelete: "CASCADE",
+    hooks: true
+  })
+  assessments: Assessment[]
+
+  @BelongsToMany(() => Game_type, {
+    through: { model: () => Hrs_game_type },
+  })
+  game_type: Game_type[]
 
   @Column
   company_industry!: string

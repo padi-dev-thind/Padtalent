@@ -119,7 +119,162 @@ module.exports = {
       answer:"no",
       created_at: new Date(),
       updated_at: new Date()
-    }
+    },
+    {
+      id: uuidv4(),
+      statement1: "s14",
+      statement2: "s14",
+      conclusion: "c14",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s15",
+      statement2: "s15",
+      conclusion: "c15",
+      answer:"yes",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s16",
+      statement2: "s16",
+      conclusion: "c16",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s17",
+      statement2: "s17",
+      conclusion: "c17",
+      answer:"yes",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s18",
+      statement2: "s18",
+      conclusion: "c18",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s19",
+      statement2: "s19",
+      conclusion: "c19",
+      answer:"yes",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s20",
+      statement2: "s20",
+      conclusion: "c20",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s21",
+      statement2: "s21",
+      conclusion: "c21",
+      answer:"yes",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s22",
+      statement2: "s22",
+      conclusion: "c22",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s23",
+      statement2: "s23",
+      conclusion: "c23",
+      answer:"yes",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s24",
+      statement2: "s24",
+      conclusion: "c24",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s25",
+      statement2: "s25",
+      conclusion: "c25",
+      answer:"yes",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+
+    {
+      id: uuidv4(),
+      statement1: "s26",
+      statement2: "s26",
+      conclusion: "c26",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s27",
+      statement2: "s27",
+      conclusion: "c27",
+      answer:"yes",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s28",
+      statement2: "s28",
+      conclusion: "c28",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s29",
+      statement2: "s29",
+      conclusion: "c29",
+      answer:"yes",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    {
+      id: uuidv4(),
+      statement1: "s30",
+      statement2: "s30",
+      conclusion: "c30",
+      answer:"no",
+      created_at: new Date(),
+      updated_at: new Date()
+    },
+    
   ]);
   },
 

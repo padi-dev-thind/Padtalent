@@ -17,7 +17,6 @@ export class BaseController {
 
   public setCode(code: number): this {
     this.code = code
-
     return this
   }
 

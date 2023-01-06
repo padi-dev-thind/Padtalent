@@ -70,10 +70,10 @@ class logicalTestController extends BaseController {
       const no_questions_all = no_data.rows
       //test 10 question in a test 5 yes and 5 no
       const suffle_yes_questions = yes_questions_all.sort(()=>0.5 - Math.random())
-      const random_yes_questions = suffle_yes_questions.slice(0,5)
+      const random_yes_questions = suffle_yes_questions.slice(0,NumberOfQuestionGame.logical/2)
 
       const suffle_no_questions = no_questions_all.sort(()=>0.5 - Math.random())
-      const random_no_questions = suffle_no_questions.slice(0,5)
+      const random_no_questions = suffle_no_questions.slice(0,NumberOfQuestionGame.logical/2)
       
       const random_questions = random_no_questions.concat(random_yes_questions)
       random_questions.sort(()=>0.5 - Math.random())
@@ -347,7 +347,7 @@ class logicalTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 
@@ -388,7 +388,7 @@ class logicalTestController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error'  ).responseErrors(res);
     }
   }
 }

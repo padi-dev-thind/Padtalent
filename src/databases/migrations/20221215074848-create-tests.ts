@@ -15,7 +15,9 @@ module.exports = {
         references: {
           model: 'game_types',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       candidate_id: {
         allowNull: false,
@@ -23,7 +25,9 @@ module.exports = {
         references: {
           model: 'candidates',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       assessment_id: {
         allowNull: false,
@@ -31,7 +35,9 @@ module.exports = {
         references: {
           model: 'assessments',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       status: {
         allowNull: false,

@@ -5,7 +5,7 @@ import { BaseRepositoryInterface } from './interfaces/base.repository.interface'
 
 @Service()
 export abstract class BaseRepository<M extends Model> implements BaseRepositoryInterface {
-  protected model: ModelCtor<M>;
+  public model: ModelCtor<M>;
 
   constructor(model: ModelCtor<M>) {
     this.model = model;

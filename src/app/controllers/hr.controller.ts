@@ -151,6 +151,33 @@ class HrController extends BaseController {
       return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
+
+  @Authorized()
+  @UseBefore(AdminMiddleware)
+  @Delete('/hard-delete/:id')
+  async hardDelete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+        
+        const id = req.params.id
+        const test = await this.hrRepository.findByCondition({where:{id: id}})
+        if(test){
+          if(test.is_admin == true){
+            throw new Error(id + ' is admin ');
+          }
+          await this.hrRepository.delete({where:{id:id}, force: true})
+          return this.setData( 
+            "Hard Delete successfully"
+          )
+            .setMessage('Success')
+            .responseSuccess(res);
+        }
+        else{
+          throw new BadRequestError('not found');
+        }
+    } catch (error) {
+      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+    }
+  }
 }
 
 export default HrController

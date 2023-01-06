@@ -13,6 +13,10 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING(30)
       },
+      description: {
+        allowNull: true,
+        type: Sequelize.TEXT
+      },
       total_time: {
         allowNull: false,
         type: Sequelize.INTEGER

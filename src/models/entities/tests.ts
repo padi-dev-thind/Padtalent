@@ -1,4 +1,7 @@
-import { Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt, AutoIncrement, DataType, DeletedAt } from 'sequelize-typescript'
+import { Column, CreatedAt, Model, PrimaryKey, Table, UpdatedAt, AutoIncrement, DataType, DeletedAt, BelongsTo, ForeignKey } from 'sequelize-typescript'
+import Assessment from './assessments'
+import Candidate from './candidates'
+import Game_type from './game_types'
 
 @Table({
   tableName: 'tests',
@@ -12,12 +15,30 @@ export default class Test extends Model<Test> {
   )
   id!: string
 
+  @BelongsTo(()=>Assessment,'assessment_id')
+  assessment!: Assessment[]
+
+  @ForeignKey(() => Game_type)
+  @Column({
+    allowNull: false,
+    field: 'game_type_id'
+  })
   @Column
   game_type_id!: number
 
+  @ForeignKey(() => Candidate)
+  @Column({
+    allowNull: false,
+    field: 'candidate_id'
+  })
   @Column
   candidate_id!: string
   
+  @ForeignKey(() => Assessment)
+  @Column({
+    allowNull: false,
+    field: 'assessment_id'
+  })
   @Column
   assessment_id!: string
 
