@@ -15,7 +15,9 @@ module.exports = {
         references: {
           model: 'tests',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       memory_question_id: {
         allowNull: false,
@@ -23,7 +25,9 @@ module.exports = {
         references: {
           model: 'memory_questions',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       candidate_answer: {
         allowNull: true,

@@ -15,7 +15,9 @@ module.exports = {
         references: {
           model: 'tests',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       logical_question_id: {
         allowNull: false,
@@ -23,7 +25,9 @@ module.exports = {
         references: {
           model: 'logical_questions',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       question_number: {
         allowNull: true,

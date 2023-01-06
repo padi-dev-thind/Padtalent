@@ -15,7 +15,10 @@ module.exports = {
         references: {
           model: 'hrs',
           key: 'id',
-        }
+          
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       },
       link: {
         allowNull: false,
