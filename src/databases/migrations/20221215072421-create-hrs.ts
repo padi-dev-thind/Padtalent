@@ -17,9 +17,14 @@ module.exports = {
         allowNull: false,
         type: Sequelize.TEXT
       },
+      reset_pass_link: {
+        allowNull: true,
+        type: Sequelize.TEXT
+      },
       email: {
         allowNull: true,
-        type: Sequelize.STRING(256)
+        type: Sequelize.STRING(256),
+        unique: true
       },
       role: {
         allowNull: true,

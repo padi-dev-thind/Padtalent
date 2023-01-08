@@ -16,5 +16,4 @@ export interface AuthRequest extends Request {
   hr: Hr;
   candidate: Candidate
   assessment: Assessment
-  test: Test
 }

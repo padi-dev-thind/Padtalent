@@ -12,7 +12,6 @@ import { Service } from 'typedi';
 import {AsssessmentDto} from '../../dtos/assessment.dto'
 import { AuthRequest } from '@interfaces/response.interface';;
 import nodemailer from "nodemailer";
-import { GameType } from '@enum/game.enum';
 
 
 
@@ -73,34 +72,34 @@ class AssessmentController extends BaseController {
   @Put('/update/:id')
   async update(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
-        const assessDto: AsssessmentDto = req.body;
-        const hr = req.hr
-        const {name, game_types, start_date, end_date} = assessDto;
-  
-        //check if hr hr has right to approach the game type
-        for (const type of game_types){
-          const game_type = await this.hr_game_typeRepository.findByCondition({where:{hr_id: hr.id, game_type_id: type}})
-          if (!game_type){
-            throw new Error(' have not the right to create game id ' + type);
-          }
+      const assessDto: AsssessmentDto = req.body;
+      const hr = req.hr
+      const {name, game_types, start_date, end_date} = assessDto;
+
+      //check if hr hr has right to approach the game type
+      for (const type of game_types){
+        const game_type = await this.hr_game_typeRepository.findByCondition({where:{hr_id: hr.id, game_type_id: type}})
+        if (!game_type){
+          throw new Error(' have not the right to create game id ' + type);
         }
-        const updateAss = await this.assessmentRepository.update(
-          {name: name,  start_date: start_date, end_date: end_date},
-          {where:{
-            id: req.params.id,
-          }})
-        if(updateAss == 0){
-          throw new Error('can find this assessment');
-        }
-        //update game type
-        for (const type of game_types){
-          await this.assessment_game_typeRepository.findOrCreateByCondition({where:{assessment_id: req.params.id, game_type_id: type}})
-        }
-        return this.setData(
-          "update successfully"
-          )
-            .setMessage('Success')
-            .responseSuccess(res);
+      }
+      const updateAss = await this.assessmentRepository.update(
+        {name: name,  start_date: start_date, end_date: end_date},
+        {where:{
+          id: req.params.id,
+        }})
+      if(updateAss == 0){
+        throw new Error('can find this assessment');
+      }
+      //update game type
+      for (const type of game_types){
+        await this.assessment_game_typeRepository.findOrCreateByCondition({where:{assessment_id: req.params.id, game_type_id: type}})
+      }
+      return this.setData(
+        "update successfully"
+        )
+          .setMessage('Success')
+          .responseSuccess(res);
   } catch (error) {
       return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
@@ -111,18 +110,24 @@ class AssessmentController extends BaseController {
   @Delete('/delete/:id')
   async delete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
-        const assessment = await this.assessmentRepository.findById(req.params.id) 
-        if(assessment){
-          await this.assessmentRepository.deleteById(req.params.id)
-          return this.setData(
-              'Delete assessment successfully'
-            )
-              .setMessage('Success')
-              .responseSuccess(res);
-        }
-        else{
-          throw new Error('not found')
-        }
+      const hr = req.hr
+      const assessment = await this.assessmentRepository.findByCondition(
+        {where:
+          {
+            id: req.params.id,
+            hr_id: hr.id
+        }})
+      if(assessment){
+        await this.assessmentRepository.deleteById(req.params.id)
+        return this.setData(
+            'Delete assessment successfully'
+          )
+            .setMessage('Success')
+            .responseSuccess(res);
+      }
+      else{
+        throw new Error('not found')
+      }
     } catch (error) {
       return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
@@ -132,19 +137,25 @@ class AssessmentController extends BaseController {
   @Delete('/hard-delete/:id')
   async hardDelete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
+      const hr = req.hr
       const id = req.params.id
-        const assessment = await this.assessmentRepository.findById(id) 
-        if(assessment){
-          await this.assessmentRepository.delete({where:{id: id}, force: true})
-          return this.setData(
-              'Hard Delete assessment successfully'
-            )
-              .setMessage('Success')
-              .responseSuccess(res);
-        }
-        else{
-          throw new Error('not found')
-        }
+      const assessment = await this.assessmentRepository.findByCondition(
+        {where:
+          {
+            id: req.params.id,
+            hr_id: hr.id
+        }})
+      if(assessment){
+        await this.assessmentRepository.delete({where:{id: id}, force: true})
+        return this.setData(
+            'Hard Delete assessment successfully'
+          )
+            .setMessage('Success')
+            .responseSuccess(res);
+      }
+      else{
+        throw new Error('not found')
+      }
     } catch (error) {
       return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
@@ -155,13 +166,43 @@ class AssessmentController extends BaseController {
   @Post('/restore/:id')
   async restore(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
-        await this.assessmentRepository.restore({where:{id: req.params.id}})
-        return this.setData(
-            'restore assessment successfully'
-          )
-            .setMessage('Success')
-            .responseSuccess(res);
+      const hr = req.hr
+      await this.assessmentRepository.restore({where:{id: req.params.id, hr_id: hr.id}})
+      return this.setData(
+          'restore assessment successfully'
+        )
+          .setMessage('Success')
+          .responseSuccess(res);
         
+    } catch (error) {
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+    }
+  }
+
+  
+  @Authorized()
+  @UseBefore(AuthMiddleware)
+  @Put('/archive/:id')
+  async archive(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+        const hr = req.hr
+        const assessemnt = await this.assessmentRepository.findByCondition(
+          {where:
+            {
+              id: req.params.id,
+              hr_id: hr.id
+            }})
+        if(assessemnt){
+          this.assessmentRepository.update({is_archived: true},{where:{id: req.params.id}})
+          return this.setData( 
+              "Archive the assessments successfully"
+            )
+              .setMessage('Success')
+              .responseSuccess(res);
+          }
+          else{
+            throw new Error('Error Assessment')
+          }
     } catch (error) {
       return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }

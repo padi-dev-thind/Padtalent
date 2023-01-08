@@ -57,6 +57,9 @@ export default class Assessment extends Model<Assessment> {
   name!: string
 
   @Column
+  is_archived!: boolean
+
+  @Column
   link!: string
   
   @Column

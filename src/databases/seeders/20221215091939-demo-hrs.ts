@@ -7,7 +7,7 @@ module.exports = {
       id: "1f1414f7-d5f5-42c4-b59c-35e3d16b634d",
       name: 'admin',
       password: "\"$2b$10$gaob4ggaDYOGh9F3MgBCEOvcFDN7le25hbyM3VKoqveCzU7NSlBX2\"" ,//pass
-      email: 'hr@1',
+      email: 'admin@gmail.com',
       role: 'hr',
       company: 'pad',
       logo:'logo',
@@ -47,7 +47,7 @@ module.exports = {
       id: "599fb02d-7f5a-436e-8873-683f70dd606b",
       name: 'hr4',
       password: "\"$2b$10$gaob4ggaDYOGh9F3MgBCEOvcFDN7le25hbyM3VKoqveCzU7NSlBX2\"" ,//pass,
-      email: 'hr@4',
+      email: 'thind@paditech.com',
       role: 'hr',
       company: 'pad',
       logo:'logo',

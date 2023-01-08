@@ -38,6 +38,11 @@ export class CandidateMiddleware implements ExpressMiddlewareInterface {
       if (!assessemnt) {
         return next(new HttpException(401, 'Assessments-errors'));
       }
+
+      if (assessemnt.is_archived) {
+        return next(new HttpException(401, 'Assessments has been archived'));
+      }
+
       request.candidate = candidate;
       request.assessment = assessemnt;
 

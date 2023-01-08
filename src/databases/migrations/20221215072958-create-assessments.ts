@@ -30,6 +30,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
+      is_archived: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       start_date: {
         allowNull: true,
         type: Sequelize.DATE

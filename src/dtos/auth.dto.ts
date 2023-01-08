@@ -5,7 +5,7 @@ export class LoginDto {
   @Expose()
   @IsNotEmpty()
   @IsString()
-  name: string;
+  email: string;
 
   @Expose()
   @IsNotEmpty()

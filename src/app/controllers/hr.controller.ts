@@ -2,7 +2,7 @@ import { NextFunction, Response, Request } from 'express';
 import HrRepository from '@repositories/hr.repository';
 import Hr_game_typeRepository from '@repositories/hr_game_type.repository';
 import { BaseController } from './base.controller';
-import { Authorized, UseBefore, BadRequestError, CurrentUser, Body, Get, JsonController, Post, Req, Res, Delete, Put } from 'routing-controllers';
+import { Authorized, UseBefore, BadRequestError, Get, JsonController, Post, Req, Res, Delete, Put } from 'routing-controllers';
 import { AuthMiddleware } from '@middlewares/auth.middleware';
 import { Service } from 'typedi';
 import { AuthRequest } from '@interfaces/response.interface';
@@ -11,11 +11,10 @@ import { AdminMiddleware } from '@middlewares/admin.middleware';
 import * as bcrypt from 'bcrypt'
 import { env } from '@env';
 import { toNumber } from '@lib/env/utils';
-import { GameType } from '@enum/game.enum';
 import AssessmentRepository from '@repositories/assessment.repository';
 import Candidates_assessmentsRepository from '@repositories/candidates_assessments.repository';
+import nodemailer from "nodemailer";
 const { v4: uuidv4 } = require('uuid');
-
 
 @JsonController('/hr')
 @Service()
@@ -29,6 +28,8 @@ class HrController extends BaseController {
   {
     super();
   }
+  
+  protected resetPasswordLinkTimeOut: any
   
   @Authorized()
   @UseBefore(AdminMiddleware)
@@ -130,8 +131,8 @@ class HrController extends BaseController {
   async delete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
         const id = req.params.id
-        const test = await this.hrRepository.findByCondition({where:{id: id}})
-        if(test){
+        const hr = await this.hrRepository.findByCondition({where:{id: id}})
+        if(hr){
           const assessemnt = await this.assessmentRepository.findByCondition({where:{hr_id: id}})
           if (assessemnt)
             await this.candidates_assessmentsRepository.delete({where:{assessment_id: id}})
@@ -148,7 +149,7 @@ class HrController extends BaseController {
           throw new BadRequestError('not found');
         }
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
 
@@ -159,9 +160,9 @@ class HrController extends BaseController {
     try {
         
         const id = req.params.id
-        const test = await this.hrRepository.findByCondition({where:{id: id}})
-        if(test){
-          if(test.is_admin == true){
+        const hr = await this.hrRepository.findByCondition({where:{id: id}})
+        if(hr){
+          if(hr.is_admin == true){
             throw new Error(id + ' is admin ');
           }
           await this.hrRepository.delete({where:{id:id}, force: true})
@@ -175,10 +176,148 @@ class HrController extends BaseController {
           throw new BadRequestError('not found');
         }
     } catch (error) {
-      return this.setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
     }
   }
+
+  @Post('/send-email-reset-password')
+  async sendEmailResetPassWord(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+      const email = req.body.email
+      const hr = await this.hrRepository.findByCondition({where:{email: email}})
+      const reset_pass_link = 'Paditech/reset-password/' + uuidv4()
+      if(hr)
+      {
+        await this.hrRepository.update({reset_pass_link: reset_pass_link},{where:{email: email}})
+        this.resetPasswordLinkTimeOut = setTimeout(async ()=>{
+          await this.hrRepository.update({reset_pass_link: null},{where:{email: email}})
+          console.log('time out')
+         },120000) 
+      }
+      else
+      {
+        throw new Error("not found email")
+      }
+      var transporter =  nodemailer.createTransport({ // config mail server
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: 'thideptrai123tq@gmail.com',
+            pass: 'asmfjykwiexxckkg'
+        }
+      });
+      var mainOptions = { // thiết lập đối tượng, nội dung gửi mail
+      from: 'Paditech',
+      to: email,
+      subject: 'Reset your password',
+      text: '' ,
+      html:'<a href="https://' + reset_pass_link + '">click here to reset your password</a>'
+
+    }
+    let mg
+    transporter.sendMail(mainOptions, await function(err, info){
+      if (err) {
+          throw new Error(err.message)
+      } else {
+          console.log('Message sent: ' +  info.response);
+          mg = 'Message sent: ' +  info.response
+      }
+    });
+    return this.setData( 
+      reset_pass_link
+    )
+      .setMessage('Success')
+      .responseSuccess(res);
+    } catch (error) {
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+    }
+  }
+
+  @Post('/:id/check-link-reset-password-validation')
+  async checkEmail(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+      const link = 'Paditech/reset-password/' + req.params.id
+      const hr = await this.hrRepository.findByCondition({where:{reset_pass_link: link}})
+      if(!hr)
+      {
+        throw new Error("link is not available")
+      }
+    
+      return this.setData( 
+      'link is available'
+      )
+      .setMessage('Success')
+      .responseSuccess(res);
+    } catch (error) {
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+    }
+  }
+
+  @Post('/:id/reset-password')
+  async resetPass(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+      const newPassword = req.body.newPassword
+      const newhashPassWord = await bcrypt.hash(newPassword, toNumber(env.auth.pass_sec))
+      const link = 'Paditech/reset-password/' + req.params.id
+      const hr = await this.hrRepository.findByCondition({where:{reset_pass_link: link}})
+      if(!hr)
+      {
+        throw new Error("link is not available")
+      }
+      {
+        clearTimeout(this.resetPasswordLinkTimeOut)
+        await this.hrRepository.update(
+          {
+            password: JSON.stringify(newhashPassWord),
+            reset_pass_link: null
+          },
+          {
+            where:
+              {
+                reset_pass_link: link
+              }
+          }
+        )
+      }
+      return this.setData( 
+      'reset pass successfully'
+      )
+      .setMessage('Success')
+      .responseSuccess(res);
+    } catch (error) {
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+    }
+  }
+
+  @Authorized()
+  @UseBefore(AuthMiddleware)
+  @Put('/change-password')
+  async changePass(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+        const currentPassword = req.body.currentPassword
+        const newPassword = req.body.newPassword
+        const newHashPassWord = await bcrypt.hash(newPassword, toNumber(env.auth.pass_sec))
+        const hr = req.hr
+        if(await bcrypt.compare(currentPassword, JSON.parse(hr.password))){
+          await this.hrRepository.update({password: JSON.stringify(newHashPassWord)},{where:{id: hr.id}})
+        }
+        else{
+          throw new BadRequestError('not matched');
+        }
+        return this.setData( 
+          'change pass successfully'
+          )
+          .setMessage('Success')
+          .responseSuccess(res);
+    } catch (error) {
+      return this.setData({}).setCode(error?.status || 500).setStack(error.stack).setMessage(error?.message || 'Internal server error').responseErrors(res);
+    }
+  }
+
 }
+
+
 
 export default HrController
 

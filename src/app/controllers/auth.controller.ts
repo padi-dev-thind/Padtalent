@@ -27,8 +27,8 @@ class AuthController extends BaseController {
   async login(@Req() req: Request, @Res() res: Response, next: NextFunction) {
     try {
       const loginDto: LoginDto = req.body;
-      const {name, password} = loginDto;
-      const hr = await this.authRepository.findByName(name);
+      const {email, password} = loginDto;
+      const hr = await this.authRepository.findByCondition({where: {email: email}});
 
       let isMatch = false
       if(hr){

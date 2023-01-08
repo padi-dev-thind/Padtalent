@@ -18,6 +18,9 @@ export default class Hr extends Model<Hr> {
 
   @Column
   name!: string
+
+  @Column
+  reset_pass_link!: string
   
   @Column
   logo!: string
