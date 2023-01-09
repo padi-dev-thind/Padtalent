@@ -1,6 +1,10 @@
 import Hr from '@models/entities/hrs';
 import Candidate from '@models/entities/candidates';
-import { IAccessToken, ICandidateAccessToken, IRefreshToken } from '@interfaces/token.interface';
+import {
+  IAccessToken,
+  ICandidateAccessToken,
+  IRefreshToken,
+} from '@interfaces/token.interface';
 import jwt from 'jsonwebtoken';
 import { env } from '@env';
 
@@ -16,15 +20,18 @@ const createAccessToken = (Hr: Hr, isAdmin: boolean): string => {
   );
 };
 
-const createCandidateAccessToken = (candidate: Candidate, assessemnt_id: string): string => {
+const createCandidateAccessToken = (
+  candidate: Candidate,
+  assessemnt_id: string,
+): string => {
   return jwt.sign(
     {
       candidate_id: candidate.id,
-      assessment_id: assessemnt_id
+      assessment_id: assessemnt_id,
     },
     env.app.jwt_secret as jwt.Secret,
     {
-      expiresIn: '7d',//last change 1h
+      expiresIn: '7d', //last change 1h
     },
   );
 };
@@ -33,7 +40,7 @@ const createRefreshToken = (Hr: Hr, isAdmin: boolean): string => {
   return jwt.sign(
     {
       id: Hr.id,
-    },  
+    },
     env.app.jwt_secret as jwt.Secret,
     {
       expiresIn: '1d',
@@ -43,7 +50,9 @@ const createRefreshToken = (Hr: Hr, isAdmin: boolean): string => {
 
 const verifyToken = async (
   token: string,
-): Promise<jwt.VerifyErrors | IAccessToken | IRefreshToken | ICandidateAccessToken> => {
+): Promise<
+  jwt.VerifyErrors | IAccessToken | IRefreshToken | ICandidateAccessToken
+> => {
   return new Promise((resolve, reject) => {
     jwt.verify(token, env.app.jwt_secret as jwt.Secret, (err, payload) => {
       if (err) return reject(err);
@@ -52,4 +61,9 @@ const verifyToken = async (
   });
 };
 
-export { createAccessToken, createRefreshToken, verifyToken, createCandidateAccessToken };
+export {
+  createAccessToken,
+  createRefreshToken,
+  verifyToken,
+  createCandidateAccessToken,
+};

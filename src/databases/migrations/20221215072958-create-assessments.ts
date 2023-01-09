@@ -15,49 +15,47 @@ module.exports = {
         references: {
           model: 'hrs',
           key: 'id',
-          
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
       link: {
         allowNull: false,
         type: Sequelize.STRING,
-        defaultValue: `Padtalent/invite/${this.id}`
-        
+        defaultValue: `Padtalent/invite/${this.id}`,
       },
       name: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       is_archived: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
-        defaultValue: false
+        defaultValue: false,
       },
       start_date: {
         allowNull: true,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       end_date: {
         allowNull: true,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deleted_at: {
         allowNull: true,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('assessments');
-  }
+  },
 };

@@ -6,11 +6,14 @@ import { IAccessToken } from '@interfaces/token.interface';
 import { verifyToken } from '@utils/tokenHandler';
 import Hr from '@models/entities/hrs';
 
-
 @Service()
 export class AdminMiddleware implements ExpressMiddlewareInterface {
   // interface implementation is optional
-  async use(request: AuthRequest, response: any, next?: (err?: any) => any): Promise<any> {
+  async use(
+    request: AuthRequest,
+    response: any,
+    next?: (err?: any) => any,
+  ): Promise<any> {
     const bearer = request.headers.authorization;
     if (!bearer || !bearer.startsWith('Bearer ')) {
       return next(new HttpException(401, 'Unauthorised'));

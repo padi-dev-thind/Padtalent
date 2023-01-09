@@ -14,20 +14,20 @@ module.exports = {
         type: Sequelize.UUID,
         references: {
           model: 'tests',
-          key: 'id'
+          key: 'id',
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
       memory_question_id: {
         allowNull: false,
         type: Sequelize.UUID,
         references: {
           model: 'memory_questions',
-          key: 'id'
+          key: 'id',
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
       candidate_answer: {
         allowNull: true,
@@ -35,36 +35,45 @@ module.exports = {
       },
       question_number: {
         allowNull: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
-      status:{
+      status: {
         allowNull: false,
         type: Sequelize.STRING(20),
-        validate:{
-          isIn:[['not answer','answering','correct answer','wrong answer' ,'time out', 'skiped']]
+        validate: {
+          isIn: [
+            [
+              'not answer',
+              'answering',
+              'correct answer',
+              'wrong answer',
+              'time out',
+              'skiped',
+            ],
+          ],
         },
-        defaultValue:'not answer'
+        defaultValue: 'not answer',
       },
       is_showed_data: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
-        defaultValue: false
+        defaultValue: false,
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deleted_at: {
         allowNull: true,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('memory_questions_tests');
-  }
+  },
 };

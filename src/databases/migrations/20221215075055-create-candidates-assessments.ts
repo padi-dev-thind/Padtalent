@@ -14,45 +14,44 @@ module.exports = {
         type: Sequelize.UUID,
         references: {
           model: 'assessments',
-          key: 'id'
+          key: 'id',
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
       candidate_id: {
         allowNull: false,
         type: Sequelize.UUID,
         references: {
           model: 'candidates',
-          key: 'id'
+          key: 'id',
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
-      status:{
+      status: {
         allowNull: false,
         type: Sequelize.STRING(20),
-        validate:{
-          isIn:[['ready', 'not ready','deleted' ,'time out']]
+        validate: {
+          isIn: [['ready', 'not ready', 'deleted', 'time out']],
         },
-        defaultValue:'not ready'
-
+        defaultValue: 'not ready',
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deleted_at: {
         allowNull: true,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('candidates_assessments');
-  }
+  },
 };

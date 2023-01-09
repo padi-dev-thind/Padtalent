@@ -1,7 +1,7 @@
-import { plainToClass } from 'class-transformer'
-import { validate, ValidationError } from 'class-validator'
-import { RequestHandler } from 'express'
-import { HttpException } from '@exceptions/http.exception'
+import { plainToClass } from 'class-transformer';
+import { validate, ValidationError } from 'class-validator';
+import { RequestHandler } from 'express';
+import { HttpException } from '@exceptions/http.exception';
 
 const validationMiddleware = (
   type: any,
@@ -19,13 +19,13 @@ const validationMiddleware = (
       if (errors.length > 0) {
         const message = errors
           .map((error: ValidationError) => Object.values(error.constraints))
-          .join(', ')
-        next(new HttpException(400, message))
+          .join(', ');
+        next(new HttpException(400, message));
       } else {
-        next()
+        next();
       }
-    })
-  }
-}
+    });
+  };
+};
 
-export default validationMiddleware
+export default validationMiddleware;

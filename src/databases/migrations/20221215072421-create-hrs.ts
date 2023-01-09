@@ -11,60 +11,60 @@ module.exports = {
       },
       name: {
         allowNull: false,
-        type: Sequelize.STRING(128)
+        type: Sequelize.STRING(128),
       },
       password: {
         allowNull: false,
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       reset_pass_link: {
         allowNull: true,
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       email: {
         allowNull: true,
         type: Sequelize.STRING(256),
-        unique: true
+        unique: true,
       },
       role: {
         allowNull: true,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       logo: {
         allowNull: true,
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       company: {
         allowNull: true,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       company_industry: {
         allowNull: true,
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       company_size: {
         allowNull: true,
-        type: Sequelize.INTEGER     
+        type: Sequelize.INTEGER,
       },
       is_admin: {
         allowNull: true,
-        type: Sequelize.BOOLEAN     
+        type: Sequelize.BOOLEAN,
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deleted_at: {
         allowNull: true,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('hrs');
-  }
+  },
 };

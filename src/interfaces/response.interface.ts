@@ -14,6 +14,6 @@ export interface ApiResponse {
 
 export interface AuthRequest extends Request {
   hr: Hr;
-  candidate: Candidate
-  assessment: Assessment
+  candidate: Candidate;
+  assessment: Assessment;
 }

@@ -8,5 +8,5 @@ export interface IAccessToken {
 
 export interface ICandidateAccessToken {
   candidate_id: number;
-  assessment_id:number;
+  assessment_id: number;
 }

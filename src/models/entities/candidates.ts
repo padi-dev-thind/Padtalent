@@ -1,6 +1,17 @@
-import { AutoIncrement, BelongsToMany, Column, CreatedAt, DataType, DeletedAt, Model, PrimaryKey, Table, UpdatedAt } from 'sequelize-typescript'
-import Assessment from './assessments'
-import Candidate_assessment from './candidates_assessments'
+import {
+  AutoIncrement,
+  BelongsToMany,
+  Column,
+  CreatedAt,
+  DataType,
+  DeletedAt,
+  Model,
+  PrimaryKey,
+  Table,
+  UpdatedAt,
+} from 'sequelize-typescript';
+import Assessment from './assessments';
+import Candidate_assessment from './candidates_assessments';
 
 @Table({
   tableName: 'candidates',
@@ -10,28 +21,26 @@ export default class Candidate extends Model<Candidate> {
   @Column({
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
-  }
-  )
-  id!: string
+  })
+  id!: string;
 
   @Column
-  email!: string
+  email!: string;
 
   @BelongsToMany(() => Assessment, {
     through: { model: () => Candidate_assessment },
   })
-  candidate!: Candidate[]
+  candidate!: Candidate[];
 
   @CreatedAt
   @Column
-  created_at!: Date
+  created_at!: Date;
 
   @UpdatedAt
   @Column
-  updated_at!: Date
+  updated_at!: Date;
 
   @DeletedAt
   @Column
-  deleted_at!: Date
+  deleted_at!: Date;
 }
-

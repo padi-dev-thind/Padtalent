@@ -1,8 +1,8 @@
-import App from '@app'
-import validateEnv from '@utils/validateEnv'
+import App from '@app';
+import validateEnv from '@utils/validateEnv';
 
-validateEnv()
+validateEnv();
 
-const app = new App()
+const app = new App();
 
-app.listen()
+app.listen();

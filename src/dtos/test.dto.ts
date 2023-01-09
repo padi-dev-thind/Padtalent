@@ -1,5 +1,11 @@
 import { Expose } from 'class-transformer';
-import { Allow, IsNotEmpty, IsNumber, IsString, IsBoolean } from 'class-validator';
+import {
+  Allow,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsBoolean,
+} from 'class-validator';
 import { AllowNull } from 'sequelize-typescript';
 import GameType from '@enum/game.enum';
 
@@ -35,4 +41,3 @@ export class TestDto {
   @Expose()
   end_date: Date;
 }
-

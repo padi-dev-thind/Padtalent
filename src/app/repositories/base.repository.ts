@@ -2,9 +2,10 @@ import { Service } from 'typedi';
 import { ModelCtor, Model } from 'sequelize-typescript';
 import { BaseRepositoryInterface } from './interfaces/base.repository.interface';
 
-
 @Service()
-export abstract class BaseRepository<M extends Model> implements BaseRepositoryInterface {
+export abstract class BaseRepository<M extends Model>
+  implements BaseRepositoryInterface
+{
   public model: ModelCtor<M>;
 
   constructor(model: ModelCtor<M>) {
@@ -16,18 +17,15 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
   }
 
   async getAll(object?: any): Promise<M[]> {
-    if (object)
-      return this.model.findAll(object);
-    else 
-      return this.model.findAll({raw:true});
+    if (object) return this.model.findAll(object);
+    else return this.model.findAll({ raw: true });
   }
-
 
   async getAllAndCount(): Promise<{ rows: M[]; count: number }> {
     return this.model.findAndCountAll({ raw: true });
   }
 
-  async findByCondition(object: Object): Promise<M>  {
+  async findByCondition(object: Object): Promise<M> {
     return this.model.findOne(object);
   }
 
@@ -39,16 +37,16 @@ export abstract class BaseRepository<M extends Model> implements BaseRepositoryI
     return this.model.findAndCountAll({
       where: whereClause,
       offset: offset,
-      limit: limit
+      limit: limit,
     });
   }
 
   async create(object: any): Promise<M> {
-    return this.model.create(object)
+    return this.model.create(object);
   }
 
   async bulkCreate(object: any): Promise<M[]> {
-    return this.model.bulkCreate(object)
+    return this.model.bulkCreate(object);
   }
 
   async createWithAssociation(object: any, association: any) {

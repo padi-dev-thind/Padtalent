@@ -1,5 +1,5 @@
-import { Model } from 'sequelize'
-import { BaseRepositoryInterface } from './base.repository.interface'
+import { Model } from 'sequelize';
+import { BaseRepositoryInterface } from './base.repository.interface';
 
-export interface Candidates_assessmentsRepositoryInterface<M extends Model> extends BaseRepositoryInterface {
-}
+export interface Candidates_assessmentsRepositoryInterface<M extends Model>
+  extends BaseRepositoryInterface {}

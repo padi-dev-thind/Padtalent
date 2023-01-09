@@ -11,31 +11,31 @@ module.exports = {
       },
       type: {
         allowNull: false,
-        type: Sequelize.STRING(30)
+        type: Sequelize.STRING(30),
       },
       description: {
         allowNull: true,
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       total_time: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deleted_at: {
         allowNull: true,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('game_types');
-  }
+  },
 };

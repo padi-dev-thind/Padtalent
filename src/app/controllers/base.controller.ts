@@ -1,6 +1,6 @@
-import { CommonEnum } from '@enum/common.enum'
-import { ApiResponse } from '@interfaces/response.interface'
-import { HttpError } from 'routing-controllers'
+import { CommonEnum } from '@enum/common.enum';
+import { ApiResponse } from '@interfaces/response.interface';
+import { HttpError } from 'routing-controllers';
 
 export enum TYPE_RES {
   JSON,
@@ -8,23 +8,23 @@ export enum TYPE_RES {
 }
 
 export class BaseController {
-  protected code = CommonEnum.CODE_SUCCESS
-  protected data = {}
-  protected message = 'Success'
-  protected stack = 'stack'
-  protected typeRes: TYPE_RES = TYPE_RES.JSON
-  protected exception: HttpError
+  protected code = CommonEnum.CODE_SUCCESS;
+  protected data = {};
+  protected message = 'Success';
+  protected stack = 'stack';
+  protected typeRes: TYPE_RES = TYPE_RES.JSON;
+  protected exception: HttpError;
 
   public setCode(code: number): this {
-    this.code = code
-    return this
+    this.code = code;
+    return this;
   }
 
   public setData<T>(data: T): this {
-    this.data = data
-    this.setCode(200)
-    this.setStack("stack")
-    return this
+    this.data = data;
+    this.setCode(200);
+    this.setStack('stack');
+    return this;
   }
 
   public setStack(stack: string): this {
@@ -34,9 +34,9 @@ export class BaseController {
   }
 
   public setMessage(message: string): this {
-    this.message = message
+    this.message = message;
 
-    return this
+    return this;
   }
 
   getResponse(res: any, status: boolean) {
@@ -45,23 +45,23 @@ export class BaseController {
       code: this.code,
       data: this.data,
       message: this.message,
-      stack:this.stack
-    }
+      stack: this.stack,
+    };
     if (this.typeRes === TYPE_RES.JSON) {
-      return res.status(this.code).json(result)
+      return res.status(this.code).json(result);
     }
 
     if (this.typeRes === TYPE_RES.SEND) {
-      return res.status(this.code).send(result)
+      return res.status(this.code).send(result);
     }
   }
   responseSuccess(res: any) {
-    return this.getResponse(res, true)
+    return this.getResponse(res, true);
   }
 
   responseErrors(res: any): {
-    errors: Object
+    errors: Object;
   } {
-    return this.getResponse(res, false)
+    return this.getResponse(res, false);
   }
 }

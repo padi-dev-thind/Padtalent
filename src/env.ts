@@ -1,15 +1,24 @@
-import * as dotenv from 'dotenv'
-import * as path from 'path'
+import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-import * as pkg from '../package.json'
-import { getOsEnv, getOsEnvOptional, normalizePort, toBool, toNumber } from '@lib/env'
+import * as pkg from '../package.json';
+import {
+  getOsEnv,
+  getOsEnvOptional,
+  normalizePort,
+  toBool,
+  toNumber,
+} from '@lib/env';
 
 /**
  * Load .env file or for tests the .env.test file.
  */
 dotenv.config({
-  path: path.join(process.cwd(), `.env.${process.env.NODE_ENV || 'development'}.local`),
-})
+  path: path.join(
+    process.cwd(),
+    `.env.${process.env.NODE_ENV || 'development'}.local`,
+  ),
+});
 /**
  * Environment variables
  */
@@ -80,7 +89,7 @@ export const env = {
   auth: {
     defaultProvider: getOsEnv('AUTH_DEFAULT_PROVIDER'),
     jwtSecret: getOsEnv('JWT_SECRET'),
-    pass_sec: getOsEnv('PASS_SEC')
+    pass_sec: getOsEnv('PASS_SEC'),
   },
   cors: {
     origin: getOsEnv('ORIGIN'),
@@ -92,4 +101,4 @@ export const env = {
     accessKeyId: getOsEnv('AWS_S3_ACCESS_KEY_ID'),
     secretAccessKey: getOsEnv('AWS_S3_SECRET_ACCESS_KEY'),
   },
-}
+};

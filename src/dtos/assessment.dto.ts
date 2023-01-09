@@ -1,5 +1,11 @@
 import { Expose } from 'class-transformer';
-import { Allow, IsNotEmpty, IsNumber, IsString, IsBoolean } from 'class-validator';
+import {
+  Allow,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsBoolean,
+} from 'class-validator';
 import { AllowNull } from 'sequelize-typescript';
 
 export class AsssessmentDto {
@@ -19,4 +25,3 @@ export class AsssessmentDto {
   @AllowNull
   end_date: Date;
 }
-

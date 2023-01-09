@@ -1,8 +1,8 @@
-import { SequelizeOptions, Sequelize } from 'sequelize-typescript'
-import { Dialect } from 'sequelize'
-import { env } from '@env'
+import { SequelizeOptions, Sequelize } from 'sequelize-typescript';
+import { Dialect } from 'sequelize';
+import { env } from '@env';
 
-const { db } = env
+const { db } = env;
 
 const sequelizeOptions: SequelizeOptions = {
   dialect: db.dialect as Dialect,
@@ -11,7 +11,9 @@ const sequelizeOptions: SequelizeOptions = {
   storage: db.storage,
   models: [__dirname + '/entities'],
   modelMatch: (filename, member) => {
-    return filename.substring(0, filename.indexOf('.model')) === member.toLowerCase()
+    return (
+      filename.substring(0, filename.indexOf('.model')) === member.toLowerCase()
+    );
   },
   define: {
     charset: 'utf8mb4',
@@ -26,13 +28,18 @@ const sequelizeOptions: SequelizeOptions = {
   logQueryParameters: env.node === 'development',
   logging: db.logging,
   benchmark: true,
-}
+};
 
-const sequelize = new Sequelize(db.database, db.username, db.password, sequelizeOptions)
+const sequelize = new Sequelize(
+  db.database,
+  db.username,
+  db.password,
+  sequelizeOptions,
+);
 
 const DB = {
   sequelize,
   ...sequelize.models,
-}
+};
 
-export default DB
+export default DB;

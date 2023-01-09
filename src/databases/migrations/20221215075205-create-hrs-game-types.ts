@@ -14,36 +14,36 @@ module.exports = {
         type: Sequelize.UUID,
         references: {
           model: 'hrs',
-          key: 'id'
+          key: 'id',
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
       game_type_id: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
           model: 'game_types',
-          key: 'id'
+          key: 'id',
         },
         onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
+        onUpdate: 'CASCADE',
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deleted_at: {
         allowNull: true,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('hrs_game_types');
-  }
+  },
 };

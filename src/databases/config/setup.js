@@ -1,10 +1,9 @@
 // @ts-check
-'use strict'
-
+'use strict';
 
 require('dotenv').config({
   path: `.env.${process.env.NODE_ENV || 'development'}.local`,
-})
+});
 
 module.exports = {
   development: {
@@ -15,7 +14,7 @@ module.exports = {
     dialect: process.env.DB_CONNECTION,
     logging: process.env.DB_LOGGING === 'true',
     storage: process.env.DB_STORAGE,
-    useNativeUUID: true
+    useNativeUUID: true,
   },
   test: {
     database: process.env.DB_DATABASE,
@@ -40,4 +39,4 @@ module.exports = {
     dialect: process.env.DB_CONNECTION,
     logging: process.env.DB_LOGGING === 'true',
   },
-}
+};

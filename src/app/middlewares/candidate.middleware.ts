@@ -2,7 +2,10 @@ import { AuthRequest } from '@interfaces/response.interface';
 import { ExpressMiddlewareInterface } from 'routing-controllers';
 import { Service } from 'typedi';
 import { HttpException } from '@exceptions/http.exception';
-import { IAccessToken, ICandidateAccessToken } from '@interfaces/token.interface';
+import {
+  IAccessToken,
+  ICandidateAccessToken,
+} from '@interfaces/token.interface';
 import { verifyToken } from '@utils/tokenHandler';
 import Candidate from '@models/entities/candidates';
 import Assessment from '@models/entities/assessments';
@@ -10,7 +13,11 @@ import Assessment from '@models/entities/assessments';
 @Service()
 export class CandidateMiddleware implements ExpressMiddlewareInterface {
   // interface implementation is optional
-  async use(request: AuthRequest, response: any, next?: (err?: any) => any): Promise<any> {
+  async use(
+    request: AuthRequest,
+    response: any,
+    next?: (err?: any) => any,
+  ): Promise<any> {
     const bearer = request.headers.authorization;
     if (!bearer || !bearer.startsWith('Bearer ')) {
       return next(new HttpException(401, 'Unauthorised-Candidate'));
