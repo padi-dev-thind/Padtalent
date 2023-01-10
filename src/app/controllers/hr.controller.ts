@@ -24,7 +24,8 @@ import { env } from '@env';
 import { toNumber } from '@lib/env/utils';
 import AssessmentRepository from '@repositories/assessment.repository';
 import Candidates_assessmentsRepository from '@repositories/candidates_assessments.repository';
-import nodemailer from 'nodemailer';
+import {sendEmail} from '@services/email.service'
+import { HttpException } from '@exceptions/http.exception';
 const { v4: uuidv4 } = require('uuid');
 
 @JsonController('/hr')
@@ -35,20 +36,17 @@ class HrController extends BaseController {
     protected hr_game_typeRepository: Hr_game_typeRepository,
     protected assessmentRepository: AssessmentRepository,
     protected candidates_assessmentsRepository: Candidates_assessmentsRepository,
+    protected resetPasswordLinkTimeOut: any
   ) {
     super();
   }
 
-  protected resetPasswordLinkTimeOut: any;
+  
 
   @Authorized()
   @UseBefore(AdminMiddleware)
   @Post('/create')
-  async create(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async create(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hr: HrDto = req.body;
       const {
@@ -68,10 +66,7 @@ class HrController extends BaseController {
       //   env.auth.pass_sec
       // )
 
-      const hashPassword = await bcrypt.hash(
-        password,
-        toNumber(env.auth.pass_sec),
-      );
+      const hashPassword = await bcrypt.hash(password, toNumber(env.auth.pass_sec));
 
       const newHr = await this.hrRepository.create({
         name: name,
@@ -107,11 +102,7 @@ class HrController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Get('/game-types-list')
-  async getGameTypes(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getGameTypes(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hr_game_types = await this.hr_game_typeRepository.getAll({
         where: { hr_id: req.hr.id },
@@ -133,11 +124,7 @@ class HrController extends BaseController {
   @Authorized()
   @UseBefore(AdminMiddleware)
   @Get('/list')
-  async getHrs(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getHrs(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hrs = await this.hrRepository.getAll({ where: { is_admin: null } });
       let hrName;
@@ -158,11 +145,7 @@ class HrController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Get('/profile')
-  async getProfile(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getProfile(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     console.log('a');
     try {
       return this.setData(req.hr).setMessage('Success').responseSuccess(res);
@@ -177,11 +160,7 @@ class HrController extends BaseController {
   @Authorized()
   @UseBefore(AdminMiddleware)
   @Delete('/delete/:id')
-  async delete(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async delete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const id = req.params.id;
       const hr = await this.hrRepository.findByCondition({ where: { id: id } });
@@ -196,11 +175,9 @@ class HrController extends BaseController {
         await this.assessmentRepository.delete({ where: { hr_id: id } });
         await this.hr_game_typeRepository.delete({ where: { hr_id: id } });
         await this.hrRepository.deleteById(id);
-        return this.setData('delete successfully')
-          .setMessage('Success')
-          .responseSuccess(res);
+        return this.setData('delete successfully').setMessage('Success').responseSuccess(res);
       } else {
-        throw new BadRequestError('not found');
+        throw new HttpException(400,'not found');
       }
     } catch (error) {
       return this.setData({})
@@ -214,24 +191,18 @@ class HrController extends BaseController {
   @Authorized()
   @UseBefore(AdminMiddleware)
   @Delete('/hard-delete/:id')
-  async hardDelete(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async hardDelete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const id = req.params.id;
       const hr = await this.hrRepository.findByCondition({ where: { id: id } });
       if (hr) {
         if (hr.is_admin == true) {
-          throw new Error(id + ' is admin ');
+          throw new HttpException(400,id + ' is admin ');
         }
         await this.hrRepository.delete({ where: { id: id }, force: true });
-        return this.setData('Hard Delete successfully')
-          .setMessage('Success')
-          .responseSuccess(res);
+        return this.setData('Hard Delete successfully').setMessage('Success').responseSuccess(res);
       } else {
-        throw new BadRequestError('not found');
+        throw new HttpException(400,'not found');
       }
     } catch (error) {
       return this.setData({})
@@ -243,11 +214,7 @@ class HrController extends BaseController {
   }
 
   @Post('/send-email-reset-password')
-  async sendEmailResetPassWord(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async sendEmailResetPassWord(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const email = req.body.email;
       const hr = await this.hrRepository.findByCondition({
@@ -260,51 +227,22 @@ class HrController extends BaseController {
           { where: { email: email } },
         );
         this.resetPasswordLinkTimeOut = setTimeout(async () => {
-          await this.hrRepository.update(
-            { reset_pass_link: null },
-            { where: { email: email } },
-          );
+          await this.hrRepository.update({ reset_pass_link: null }, { where: { email: email } });
           console.log('time out');
         }, 120000);
       } else {
-        throw new Error('not found email');
+        throw new HttpException(400,'not found email');
       }
-      var transporter = nodemailer.createTransport({
-        // config mail server
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: 'thideptrai123tq@gmail.com',
-          pass: 'asmfjykwiexxckkg',
-        },
-      });
-      var mainOptions = {
-        // thiết lập đối tượng, nội dung gửi mail
+      const option = {
         from: 'Paditech',
         to: email,
         subject: 'Reset your password',
         text: '',
-        html:
-          '<a href="https://' +
-          reset_pass_link +
-          '">click here to reset your password</a>',
-      };
-      let mg;
-      transporter.sendMail(
-        mainOptions,
-        await function (err, info) {
-          if (err) {
-            throw new Error(err.message);
-          } else {
-            console.log('Message sent: ' + info.response);
-            mg = 'Message sent: ' + info.response;
-          }
-        },
-      );
-      return this.setData(reset_pass_link)
-        .setMessage('Success')
-        .responseSuccess(res);
+        html: '<a href="https://' + reset_pass_link + '">click here to reset your password</a>',
+      }
+      sendEmail(option, email)
+      
+      return this.setData(reset_pass_link).setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)
@@ -315,23 +253,17 @@ class HrController extends BaseController {
   }
 
   @Post('/:id/check-link-reset-password-validation')
-  async checkEmail(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async checkEmail(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const link = 'Paditech/reset-password/' + req.params.id;
       const hr = await this.hrRepository.findByCondition({
         where: { reset_pass_link: link },
       });
       if (!hr) {
-        throw new Error('link is not available');
+        throw new HttpException(400,'link is not available');
       }
 
-      return this.setData('link is available')
-        .setMessage('Success')
-        .responseSuccess(res);
+      return this.setData('link is available').setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)
@@ -342,23 +274,16 @@ class HrController extends BaseController {
   }
 
   @Post('/:id/reset-password')
-  async resetPass(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async resetPass(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const newPassword = req.body.newPassword;
-      const newhashPassWord = await bcrypt.hash(
-        newPassword,
-        toNumber(env.auth.pass_sec),
-      );
+      const newhashPassWord = await bcrypt.hash(newPassword, toNumber(env.auth.pass_sec));
       const link = 'Paditech/reset-password/' + req.params.id;
       const hr = await this.hrRepository.findByCondition({
         where: { reset_pass_link: link },
       });
       if (!hr) {
-        throw new Error('link is not available');
+        throw new HttpException(400,'link is not available');
       }
       {
         clearTimeout(this.resetPasswordLinkTimeOut);
@@ -374,9 +299,7 @@ class HrController extends BaseController {
           },
         );
       }
-      return this.setData('reset pass successfully')
-        .setMessage('Success')
-        .responseSuccess(res);
+      return this.setData('reset pass successfully').setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)
@@ -389,18 +312,11 @@ class HrController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Put('/change-password')
-  async changePass(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async changePass(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const currentPassword = req.body.currentPassword;
       const newPassword = req.body.newPassword;
-      const newHashPassWord = await bcrypt.hash(
-        newPassword,
-        toNumber(env.auth.pass_sec),
-      );
+      const newHashPassWord = await bcrypt.hash(newPassword, toNumber(env.auth.pass_sec));
       const hr = req.hr;
       if (await bcrypt.compare(currentPassword, JSON.parse(hr.password))) {
         await this.hrRepository.update(
@@ -408,11 +324,9 @@ class HrController extends BaseController {
           { where: { id: hr.id } },
         );
       } else {
-        throw new BadRequestError('not matched');
+        throw new HttpException(400,'not matched');
       }
-      return this.setData('change pass successfully')
-        .setMessage('Success')
-        .responseSuccess(res);
+      return this.setData('change pass successfully').setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)

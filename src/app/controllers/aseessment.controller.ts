@@ -9,8 +9,6 @@ import { BaseController } from './base.controller';
 import {
   Authorized,
   UseBefore,
-  CurrentUser,
-  Body,
   Get,
   JsonController,
   Post,
@@ -23,7 +21,8 @@ import { AuthMiddleware } from '@middlewares/auth.middleware';
 import { Service } from 'typedi';
 import { AsssessmentDto } from '../../dtos/assessment.dto';
 import { AuthRequest } from '@interfaces/response.interface';
-import nodemailer from 'nodemailer';
+import {sendEmail} from '@services/email.service'
+import { HttpException } from '@exceptions/http.exception';
 
 @JsonController('/assessment')
 @Service()
@@ -42,11 +41,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Post('/create')
-  async create(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async create(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const assessDto: AsssessmentDto = req.body;
       const hr = req.hr;
@@ -57,7 +52,7 @@ class AssessmentController extends BaseController {
           where: { hr_id: hr.id, game_type_id: type },
         });
         if (!game_type) {
-          throw new Error('Do not have the right to create game id: ' + type);
+          throw new HttpException(400,'Do not have the right to create game id: ' + type);
         }
       }
       //create new assessment
@@ -68,10 +63,7 @@ class AssessmentController extends BaseController {
         end_date,
       );
       const link = 'Padtalent/test/' + assessment.id;
-      await this.assessmentRepository.update(
-        { link: link },
-        { where: { id: assessment.id } },
-      );
+      await this.assessmentRepository.update({ link: link }, { where: { id: assessment.id } });
       //insert new assessment's game types
       for (const type of game_types) {
         await this.assessment_game_typeRepository.create({
@@ -97,11 +89,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Put('/update/:id')
-  async update(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async update(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const assessDto: AsssessmentDto = req.body;
       const hr = req.hr;
@@ -112,7 +100,7 @@ class AssessmentController extends BaseController {
           where: { hr_id: hr.id, game_type_id: type },
         });
         if (!game_type) {
-          throw new Error(' have not the right to create game id ' + type);
+          throw new HttpException(400,' have not the right to create game id ' + type);
         }
       }
       const updateAss = await this.assessmentRepository.update(
@@ -124,7 +112,7 @@ class AssessmentController extends BaseController {
         },
       );
       if (updateAss == 0) {
-        throw new Error('can find this assessment');
+        throw new HttpException(400,'can find this assessment');
       }
       //update game type
       for (const type of game_types) {
@@ -133,9 +121,7 @@ class AssessmentController extends BaseController {
         });
       }
 
-      return this.setData('update successfully')
-        .setMessage('Success')
-        .responseSuccess(res);
+      return this.setData('update successfully').setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)
@@ -148,11 +134,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Delete('/delete/:id')
-  async delete(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async delete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hr = req.hr;
       const assessment = await this.assessmentRepository.findByCondition({
@@ -167,7 +149,7 @@ class AssessmentController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
       } else {
-        throw new Error('not found');
+        throw new HttpException(400,'not found');
       }
     } catch (error) {
       return this.setData({})
@@ -180,11 +162,7 @@ class AssessmentController extends BaseController {
 
   @UseBefore(AuthMiddleware)
   @Delete('/hard-delete/:id')
-  async hardDelete(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async hardDelete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hr = req.hr;
       const id = req.params.id;
@@ -203,7 +181,7 @@ class AssessmentController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
       } else {
-        throw new Error('not found');
+        throw new HttpException(400,'not found');
       }
     } catch (error) {
       return this.setData({})
@@ -217,11 +195,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Post('/restore/:id')
-  async restore(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async restore(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hr = req.hr;
       await this.assessmentRepository.restore({
@@ -242,11 +216,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Put('/archive/:id')
-  async archive(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async archive(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hr = req.hr;
       const assessemnt = await this.assessmentRepository.findByCondition({
@@ -256,15 +226,12 @@ class AssessmentController extends BaseController {
         },
       });
       if (assessemnt) {
-        this.assessmentRepository.update(
-          { is_archived: true },
-          { where: { id: req.params.id } },
-        );
+        this.assessmentRepository.update({ is_archived: true }, { where: { id: req.params.id } });
         return this.setData('Archive the assessments successfully')
           .setMessage('Success')
           .responseSuccess(res);
       } else {
-        throw new Error('Error Assessment');
+        throw new HttpException(400,'Error Assessment');
       }
     } catch (error) {
       return this.setData({})
@@ -278,11 +245,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Get('/result/:id')
-  async getResult(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getResult(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const transporter = this;
       const id = req.params.id;
@@ -295,9 +258,7 @@ class AssessmentController extends BaseController {
       const results = await Promise.all(
         rows.map(async function (test) {
           const candidate_id = test.candidate_id;
-          const candidate = await transporter.candidateRepository.findById(
-            candidate_id,
-          );
+          const candidate = await transporter.candidateRepository.findById(candidate_id);
           const candidate_email = candidate.email;
           console.log(candidate.email);
           return {
@@ -309,10 +270,7 @@ class AssessmentController extends BaseController {
           };
         }),
       );
-      return this.setData(results)
-        .setCode(200)
-        .setMessage('Success')
-        .responseSuccess(res);
+      return this.setData(results).setCode(200).setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setCode(error?.status || 500)
         .setMessage(error?.message || 'Internal server error')
@@ -323,11 +281,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Get('/list')
-  async getAssessments(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getAssessments(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hr = req.hr;
       const assessments = await this.assessmentRepository.getAll({
@@ -341,7 +295,7 @@ class AssessmentController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
       } else {
-        throw new Error('Error Assessment');
+        throw new HttpException(400,'Error Assessment');
       }
     } catch (error) {
       return this.setCode(error?.status || 500)
@@ -353,21 +307,17 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Get('/:id/link')
-  async getLink(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getLink(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const hr = req.hr;
       const assessment = await this.assessmentRepository.findByCondition({
         where: { id: req.params.id },
       });
       if (!assessment) {
-        throw new Error('not found assessment');
+        throw new HttpException(400,'not found assessment');
       }
       if (assessment.hr_id != hr.id) {
-        throw new Error('this hr don t have the right to access this link');
+        throw new HttpException(400,'this hr don t have the right to access this link');
       }
       if (assessment) {
         return this.setData({
@@ -377,7 +327,7 @@ class AssessmentController extends BaseController {
           .setMessage('Success')
           .responseSuccess(res);
       } else {
-        throw new Error('Error Assessment');
+        throw new HttpException(400,'Error Assessment');
       }
     } catch (error) {
       return this.setCode(error?.status || 500)
@@ -390,11 +340,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Post('/:id/send-email')
-  async inviteByEmail(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async inviteByEmail(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const email = req.body.email;
       await this.candidateRepository.create({ email: email });
@@ -402,41 +348,16 @@ class AssessmentController extends BaseController {
         where: { id: req.params.id },
       });
       if (!assessment) {
-        throw new Error('not found assessment');
+        throw new HttpException(400,'not found assessment');
       }
-      var transporter = nodemailer.createTransport({
-        // config mail server
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: 'thideptrai123tq@gmail.com',
-          pass: 'asmfjykwiexxckkg',
-        },
-      });
-      var mainOptions = {
-        // thiết lập đối tượng, nội dung gửi mail
+      const option = {
         from: 'Paditech',
         to: email,
         subject: 'Test inviatation',
         text: 'You have got a invite to test',
-        html:
-          '<a href="https://' +
-          assessment.link +
-          '">click here to join the test</a>',
-      };
-      let mg;
-      transporter.sendMail(
-        mainOptions,
-        await function (err, info) {
-          if (err) {
-            throw new Error(err.message);
-          } else {
-            console.log('Message sent: ' + info.response);
-            mg = 'Message sent: ' + info.response;
-          }
-        },
-      );
+        html: '<a href="https://' + assessment.link + '">click here to join the test</a>',
+      }
+      const mg = sendEmail(option, email)
       return this.setData(mg).setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
@@ -450,11 +371,7 @@ class AssessmentController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Post('/:id/upload-list')
-  async uploadCandidateList(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async uploadCandidateList(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const data = req.body;
       const list = await this.candidateRepository.bulkCreate(data);

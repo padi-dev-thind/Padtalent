@@ -3,9 +3,7 @@ import { ModelCtor, Model } from 'sequelize-typescript';
 import { BaseRepositoryInterface } from './interfaces/base.repository.interface';
 
 @Service()
-export abstract class BaseRepository<M extends Model>
-  implements BaseRepositoryInterface
-{
+export abstract class BaseRepository<M extends Model> implements BaseRepositoryInterface {
   public model: ModelCtor<M>;
 
   constructor(model: ModelCtor<M>) {

@@ -10,9 +10,7 @@ class AssessmentRepository
   extends BaseRepository<Assessment>
   implements AssessmentRepositoryInterface<Assessment>
 {
-  constructor(
-    @ModelContainer(Assessment.tableName) Assessment: ModelCtor<Assessment>,
-  ) {
+  constructor(@ModelContainer(Assessment.tableName) Assessment: ModelCtor<Assessment>) {
     super(Assessment);
   }
 
@@ -29,10 +27,8 @@ class AssessmentRepository
         start_date: start_date,
         end_date: end_date,
       });
-    else if (start_date)
-      return this.create({ hr_id: hr_id, name: name, start_date: start_date });
-    else if (end_date)
-      return this.create({ hr_id: hr_id, name: name, end_date: end_date });
+    else if (start_date) return this.create({ hr_id: hr_id, name: name, start_date: start_date });
+    else if (end_date) return this.create({ hr_id: hr_id, name: name, end_date: end_date });
     else return this.create({ hr_id: hr_id, name: name });
   }
 

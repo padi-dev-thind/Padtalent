@@ -6,10 +6,7 @@ import { TestRepositoryInterface } from './interfaces/test.repository.interface'
 import { ModelContainer } from '@decorators/model.decorator';
 
 @Service({ global: true })
-class TestRepository
-  extends BaseRepository<Test>
-  implements TestRepositoryInterface<Test>
-{
+class TestRepository extends BaseRepository<Test> implements TestRepositoryInterface<Test> {
   constructor(@ModelContainer(Test.tableName) Test: ModelCtor<Test>) {
     super(Test);
   }

@@ -2,22 +2,13 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 
 import * as pkg from '../package.json';
-import {
-  getOsEnv,
-  getOsEnvOptional,
-  normalizePort,
-  toBool,
-  toNumber,
-} from '@lib/env';
+import { getOsEnv, getOsEnvOptional, normalizePort, toBool, toNumber } from '@lib/env';
 
 /**
  * Load .env file or for tests the .env.test file.
  */
 dotenv.config({
-  path: path.join(
-    process.cwd(),
-    `.env.${process.env.NODE_ENV || 'development'}.local`,
-  ),
+  path: path.join(process.cwd(), `.env.${process.env.NODE_ENV || 'development'}.local`),
 });
 /**
  * Environment variables

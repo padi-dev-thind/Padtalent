@@ -29,7 +29,6 @@ export class BaseController {
 
   public setStack(stack: string): this {
     this.stack = stack;
-
     return this;
   }
 

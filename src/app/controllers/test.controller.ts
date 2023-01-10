@@ -24,6 +24,7 @@ import Test from '@models/entities/tests';
 import { AuthMiddleware } from '@middlewares/auth.middleware';
 import Logical_questions_testsRepository from '@repositories/logical_questions_tests.repository';
 import Memory_questions_testsRepository from '@repositories/memory_questions_tests.repository';
+import { HttpException } from '@exceptions/http.exception';
 
 @JsonController('/test')
 @Service()
@@ -43,17 +44,12 @@ class TestController extends BaseController {
   @Authorized()
   @UseBefore(CandidateMiddleware)
   @Get('/list')
-  async getTests(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getTests(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     const that = this;
     try {
-      const assessment_game_types =
-        await this.assessment_game_typeRepository.getAll({
-          where: { assessment_id: req.assessment.id },
-        });
+      const assessment_game_types = await this.assessment_game_typeRepository.getAll({
+        where: { assessment_id: req.assessment.id },
+      });
 
       const tests = await Promise.all(assessment_game_types.map(test_filter));
 
@@ -104,11 +100,7 @@ class TestController extends BaseController {
   @Authorized()
   @UseBefore(CandidateMiddleware)
   @Get('/:id')
-  async getTest(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getTest(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const candidate = req.candidate;
       const test = await this.testRepository.findByCondition({
@@ -127,23 +119,16 @@ class TestController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Put('/archieve/:id')
-  async archive(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async archive(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const test = await this.testRepository.findByCondition({
         where: { id: req.params.id },
       });
       if (test) {
-        this.testRepository.update(
-          { status: 'achieved' },
-          { where: { id: req.params.id } },
-        );
+        this.testRepository.update({ status: 'achieved' }, { where: { id: req.params.id } });
         return this.setData(test).setMessage('Success').responseSuccess(res);
       } else {
-        throw new BadRequestError('Error Assessment');
+        throw new HttpException(400,'Error Assessment');
       }
     } catch (error) {
       return this.setData({})
@@ -157,11 +142,7 @@ class TestController extends BaseController {
   @Authorized()
   @UseBefore(AuthMiddleware)
   @Delete('/delete/:id')
-  async delete(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async delete(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const id = req.params.id;
       const test = await this.testRepository.findByCondition({
@@ -177,7 +158,7 @@ class TestController extends BaseController {
         await this.testRepository.deleteById(id);
         return this.setData(test).setMessage('Success').responseSuccess(res);
       } else {
-        throw new BadRequestError('not found');
+        throw new HttpException(400,'not found');
       }
     } catch (error) {
       return this.setData({})

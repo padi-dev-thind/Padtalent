@@ -4,8 +4,8 @@ export enum GameType {
 }
 
 export enum GameTotalTime {
-  logical = 90,
-  memory = 300,
+  logical = 90000,
+  memory = 30000000,
 }
 
 export enum NumberOfQuestionGame {

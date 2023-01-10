@@ -10,9 +10,7 @@ class CandidateRepository
   extends BaseRepository<Candidate>
   implements CandidateRepositoryInterface<Candidate>
 {
-  constructor(
-    @ModelContainer(Candidate.tableName) Candidate: ModelCtor<Candidate>,
-  ) {
+  constructor(@ModelContainer(Candidate.tableName) Candidate: ModelCtor<Candidate>) {
     super(Candidate);
   }
 

@@ -8,8 +8,7 @@ import { ModelContainer } from '@decorators/model.decorator';
 @Service({ global: true })
 class Logical_questions_testsRepository
   extends BaseRepository<Logical_questions_tests>
-  implements
-    Logical_questions_testsRepositoryInterface<Logical_questions_tests>
+  implements Logical_questions_testsRepositoryInterface<Logical_questions_tests>
 {
   constructor(
     @ModelContainer(Logical_questions_tests.tableName)

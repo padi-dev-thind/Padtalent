@@ -3,24 +3,10 @@ import { CandidateLoginDto, LoginDto } from '../../dtos/auth.dto';
 import HrRepository from '@repositories/hr.repository';
 import CandidateRepository from '@repositories/candidate.repository';
 import { BaseController } from './base.controller';
-import {
-  BadRequestError,
-  Body,
-  Get,
-  JsonController,
-  Post,
-  Req,
-  Res,
-} from 'routing-controllers';
+import { BadRequestError, JsonController, Post, Req, Res } from 'routing-controllers';
 import { Service } from 'typedi';
-import {
-  createCandidateAccessToken,
-  createAccessToken,
-  createRefreshToken,
-  verifyToken,
-} from '@utils/tokenHandler';
+import { createCandidateAccessToken, createAccessToken } from '@utils/tokenHandler';
 import * as bcrypt from 'bcrypt';
-import { toNumber } from '@lib/env';
 import Candidates_assessmentsRepository from '@repositories/candidates_assessments.repository';
 
 @JsonController('/auth')
@@ -69,35 +55,26 @@ class AuthController extends BaseController {
   }
 
   @Post('/:id/login-candidate') //id is the id of recent assessemnt
-  async loginCandidate(
-    @Req() req: Request,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async loginCandidate(@Req() req: Request, @Res() res: Response, next: NextFunction) {
     try {
       const loginDto: CandidateLoginDto = req.body;
       const email = loginDto.email;
       const candidate = await this.candidateRepository.findByCondition({
         where: { email: email },
       });
-
       let isSuccess = 1;
       if (candidate) {
-        const candidate_ass =
-          await this.candidates_assessmentsRepository.findByCondition({
-            where: {
-              candidate_id: candidate.id,
-              assessment_id: req.params.id,
-            },
-          });
+        const candidate_ass = await this.candidates_assessmentsRepository.findByCondition({
+          where: {
+            candidate_id: candidate.id,
+            assessment_id: req.params.id,
+          },
+        });
         if (!candidate_ass) {
           isSuccess = 0;
           throw new BadRequestError('Wrong candidate credentials');
         }
-        const accessToken = createCandidateAccessToken(
-          candidate,
-          req.params.id,
-        );
+        const accessToken = createCandidateAccessToken(candidate, req.params.id);
         if (isSuccess)
           return this.setData({
             accessToken,

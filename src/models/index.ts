@@ -11,9 +11,7 @@ const sequelizeOptions: SequelizeOptions = {
   storage: db.storage,
   models: [__dirname + '/entities'],
   modelMatch: (filename, member) => {
-    return (
-      filename.substring(0, filename.indexOf('.model')) === member.toLowerCase()
-    );
+    return filename.substring(0, filename.indexOf('.model')) === member.toLowerCase();
   },
   define: {
     charset: 'utf8mb4',
@@ -30,12 +28,7 @@ const sequelizeOptions: SequelizeOptions = {
   benchmark: true,
 };
 
-const sequelize = new Sequelize(
-  db.database,
-  db.username,
-  db.password,
-  sequelizeOptions,
-);
+const sequelize = new Sequelize(db.database, db.username, db.password, sequelizeOptions);
 
 const DB = {
   sequelize,

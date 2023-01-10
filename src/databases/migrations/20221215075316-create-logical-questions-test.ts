@@ -45,14 +45,7 @@ module.exports = {
         type: Sequelize.STRING(20),
         validate: {
           isIn: [
-            [
-              'not answer',
-              'answering',
-              'correct answer',
-              'wrong answer',
-              'time out',
-              'skiped',
-            ],
+            ['not answer', 'answering', 'correct answer', 'wrong answer', 'time out', 'skiped'],
           ],
         },
         defaultValue: 'not answer',

@@ -18,6 +18,7 @@ import {
 import { AuthMiddleware } from '@middlewares/auth.middleware';
 import { Service } from 'typedi';
 import { AuthRequest } from '@interfaces/response.interface';
+import { AdminMiddleware } from '@middlewares/admin.middleware';
 
 @JsonController('/candidate')
 @Service()
@@ -27,18 +28,12 @@ class CandidateController extends BaseController {
   }
 
   @Authorized()
-  @UseBefore(AuthMiddleware)
+  @UseBefore(AdminMiddleware)
   @Get('/list')
-  async getCandidates(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getCandidates(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const candidates = await this.candidateRepository.getAll();
-      return this.setData(candidates)
-        .setMessage('Success')
-        .responseSuccess(res);
+      return this.setData(candidates).setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)

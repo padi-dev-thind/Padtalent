@@ -14,9 +14,7 @@ import Memory_questions from '@models/entities/memory_questions';
 import Memory_questions_test from '@models/entities/memory_questions_test';
 import Tests from '@models/entities/tests';
 
-export function getModelFromTableName(
-  tableName: string,
-): ModelCtor | undefined {
+export function getModelFromTableName(tableName: string): ModelCtor | undefined {
   let item = undefined;
   switch (tableName) {
     case Hr.tableName:

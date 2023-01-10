@@ -28,6 +28,7 @@ import { CandidateMiddleware } from '@middlewares/candidate.middleware';
 import { GameTotalTime, GameType, NumberOfQuestionGame } from '@enum/game.enum';
 import { LogicalQuestionDto } from 'dtos/question.dto';
 import { toNumber } from '@lib/env/utils';
+import { HttpException } from '@exceptions/http.exception';
 
 @JsonController('/logical-test')
 @Service()
@@ -40,6 +41,7 @@ class logicalTestController extends BaseController {
     protected candidates_assessmentsRepository: Candidates_assessmentsRepository,
     protected logical_questions_testsRepository: Logical_questions_testsRepository,
     protected logical_questionsRepository: Logical_questionsRepository,
+    protected testTimeOut: any
   ) {
     super();
   }
@@ -47,13 +49,8 @@ class logicalTestController extends BaseController {
   @Authorized()
   @UseBefore(CandidateMiddleware)
   @Get('/start')
-  async getAssessments(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getAssessments(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
-      let isSuccess = 1;
       //check if test was created
       const test = await this.testRepository.findByCondition({
         where: {
@@ -63,8 +60,7 @@ class logicalTestController extends BaseController {
         },
       });
       if (test) {
-        isSuccess = 0;
-        throw new BadRequestError('the test had been created before');
+        throw new Error('the test had been created before');
       }
       //create new test
       const newtest = await this.testRepository.create({
@@ -78,6 +74,13 @@ class logicalTestController extends BaseController {
         start_time: new Date(),
         status: 'in progress',
       });
+
+      //set time out for the test
+      this.testTimeOut = setTimeout(async()=>
+      {
+        console.log('logical test id: ' + newtest.id + ' time out')
+        await this.testRepository.update({status: 'completed', remaining_time: 0},{where:{id: newtest.id}})
+      }, GameTotalTime.logical)
 
       let firstQuestion = null;
       const yes_data = await this.logical_questionsRepository.getByCondition(
@@ -93,21 +96,11 @@ class logicalTestController extends BaseController {
       );
       const no_questions_all = no_data.rows;
       //test 10 question in a test 5 yes and 5 no
-      const suffle_yes_questions = yes_questions_all.sort(
-        () => 0.5 - Math.random(),
-      );
-      const random_yes_questions = suffle_yes_questions.slice(
-        0,
-        NumberOfQuestionGame.logical / 2,
-      );
+      const suffle_yes_questions = yes_questions_all.sort(() => 0.5 - Math.random());
+      const random_yes_questions = suffle_yes_questions.slice(0, NumberOfQuestionGame.logical / 2);
 
-      const suffle_no_questions = no_questions_all.sort(
-        () => 0.5 - Math.random(),
-      );
-      const random_no_questions = suffle_no_questions.slice(
-        0,
-        NumberOfQuestionGame.logical / 2,
-      );
+      const suffle_no_questions = no_questions_all.sort(() => 0.5 - Math.random());
+      const random_no_questions = suffle_no_questions.slice(0, NumberOfQuestionGame.logical / 2);
 
       const random_questions = random_no_questions.concat(random_yes_questions);
       random_questions.sort(() => 0.5 - Math.random());
@@ -125,10 +118,13 @@ class logicalTestController extends BaseController {
         count++;
       }
       firstQuestion = random_questions[0];
-      if (isSuccess)
-        return this.setData({ firstQuestion })
-          .setMessage('Success')
-          .responseSuccess(res);
+      return this.setData({ 
+        firstQuestion: firstQuestion,
+        result: 'answering',
+        test_result: 0,
+        test_status: 'in progress', })
+        .setMessage('Success')
+        .responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setStack(error.stack)
@@ -140,11 +136,7 @@ class logicalTestController extends BaseController {
   @Authorized()
   @UseBefore(CandidateMiddleware)
   @Get('/continue') //socket.on('disconnect', callback()); - client side
-  async continue(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async continue(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const test = await this.testRepository.findByCondition({
         where: {
@@ -157,28 +149,23 @@ class logicalTestController extends BaseController {
       let isSuccess = 1;
       let recentQuestion = null;
       if (test) {
-        const question_raw =
-          await this.logical_questions_testsRepository.findByCondition({
-            where: {
-              status: 'answering',
-              test_id: test.id,
-            },
-          });
+        const question_raw = await this.logical_questions_testsRepository.findByCondition({
+          where: {
+            status: 'answering',
+            test_id: test.id,
+          },
+        });
         if (question_raw)
           recentQuestion = await this.logical_questionsRepository.findById(
             question_raw.logical_question_id,
           );
         else {
           isSuccess = 0;
-          throw new BadRequestError(
-            'can not find question or question was deleted',
-          );
+          throw new HttpException(400,'can not find question or question was deleted');
         }
       } else {
         isSuccess = 0;
-        throw new BadRequestError(
-          'test not start or have been completed or assessment is deleted',
-        );
+        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
       }
       if (isSuccess)
         return this.setData({
@@ -199,11 +186,7 @@ class logicalTestController extends BaseController {
   @Authorized()
   @UseBefore(CandidateMiddleware)
   @Post('/disconnect') //socket.on('disconnect', callback()); - client side
-  async disconnetTest(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async disconnetTest(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const test = await this.testRepository.findByCondition({
         where: {
@@ -223,9 +206,7 @@ class logicalTestController extends BaseController {
         );
       } else {
         isSuccess = 0;
-        throw new BadRequestError(
-          'test not start or have been completed or assessment is deleted',
-        );
+        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
       }
       if (isSuccess)
         return this.setData('updated successfully - user disconnected')
@@ -242,11 +223,7 @@ class logicalTestController extends BaseController {
   @Authorized()
   @UseBefore(CandidateMiddleware)
   @Get('/result-recent-question') //socket.on('disconnect', callback()); - client side
-  async getResultRecentQuestion(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async getResultRecentQuestion(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const logicalQuestionDto: LogicalQuestionDto = req.body;
       const { remaining_time, candidate_answer } = logicalQuestionDto;
@@ -268,29 +245,34 @@ class logicalTestController extends BaseController {
       let question_number = 0;
       let data = null;
 
+      //check if test is timeout
+      
+      if (remaining_time <= 0) {
+        await this.testRepository.update({status: 'completed'},{where:{id: test.id}})
+        clearTimeout(this.testTimeOut)
+        console.log('clear time out')
+      }
+
       if (test) {
         new_test_result = test.result;
-        const recentQuestion_raw =
-          await this.logical_questions_testsRepository.findByCondition({
-            where: {
-              test_id: test.id,
-              status: 'answering',
-            },
-          });
+        const recentQuestion_raw = await this.logical_questions_testsRepository.findByCondition({
+          where: {
+            test_id: test.id,
+            status: 'answering',
+          },
+        });
 
         question_number = recentQuestion_raw.question_number;
         //check if the recent question is the lat question
-        if (question_number == NumberOfQuestionGame.logical)
-          test_status = 'completed';
+        if (question_number == NumberOfQuestionGame.logical) test_status = 'completed';
         //get the next question
 
-        const nextQuestion_raw =
-          await this.logical_questions_testsRepository.findByCondition({
-            where: {
-              question_number: question_number + 1,
-              test_id: test.id,
-            },
-          });
+        const nextQuestion_raw = await this.logical_questions_testsRepository.findByCondition({
+          where: {
+            question_number: question_number + 1,
+            test_id: test.id,
+          },
+        });
         if (recentQuestion_raw) {
           recentQuestion = await this.logical_questionsRepository.findById(
             recentQuestion_raw.logical_question_id,
@@ -348,15 +330,13 @@ class logicalTestController extends BaseController {
           );
         } else {
           isSuccess = 0;
-          throw new BadRequestError(
+          throw new HttpException(400,
             'can not find question or question was answered or question was deleted',
           );
         }
       } else {
         isSuccess = 0;
-        throw new BadRequestError(
-          'test not start or have been completed or assessment is deleted',
-        );
+        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
       }
       if (test_status == 'in progress')
         data = {
@@ -367,6 +347,8 @@ class logicalTestController extends BaseController {
           test_status: test_status,
         };
       else if (test_status == 'completed') {
+        console.log('clear time out')
+        clearTimeout(this.testTimeOut)
         data = {
           result: status,
           test_result: new_test_result,
@@ -390,11 +372,7 @@ class logicalTestController extends BaseController {
   @Authorized()
   @UseBefore(CandidateMiddleware)
   @Put('/time-out')
-  async setTimeOut(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async setTimeOut(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const test = await this.testRepository.findByCondition({
         where: {
@@ -408,6 +386,9 @@ class logicalTestController extends BaseController {
       let isSuccess = 1;
 
       if (test) {
+
+        clearTimeout(this.testTimeOut)
+        console.log('clear time out')
         await this.testRepository.update(
           {
             remaining_time: 0,
@@ -421,14 +402,10 @@ class logicalTestController extends BaseController {
         );
       } else {
         isSuccess = 0;
-        throw new BadRequestError(
-          'test not start or have been completed or assessment is deleted',
-        );
+        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
       }
       if (isSuccess)
-        return this.setData('set time out seccessfully')
-          .setMessage('Success')
-          .responseSuccess(res);
+        return this.setData('set time out seccessfully').setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)
@@ -441,11 +418,7 @@ class logicalTestController extends BaseController {
   @Authorized()
   @UseBefore(CandidateMiddleware)
   @Put('/leave')
-  async leaveRecentTest(
-    @Req() req: AuthRequest,
-    @Res() res: Response,
-    next: NextFunction,
-  ) {
+  async leaveRecentTest(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const remaining_time = req.body;
       const test = await this.testRepository.findByCondition({
@@ -472,9 +445,7 @@ class logicalTestController extends BaseController {
         );
       } else {
         isSuccess = 0;
-        throw new BadRequestError(
-          'test not start or have been completed or assessment is deleted',
-        );
+        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
       }
       if (isSuccess)
         return this.setData('leave the test! the has been saved')

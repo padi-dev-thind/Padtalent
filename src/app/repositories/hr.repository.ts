@@ -6,10 +6,7 @@ import { HrRepositoryInterface } from './interfaces/hr.repository.interface';
 import { ModelContainer } from '@decorators/model.decorator';
 
 @Service({ global: true })
-class HrRepository
-  extends BaseRepository<Hr>
-  implements HrRepositoryInterface<Hr>
-{
+class HrRepository extends BaseRepository<Hr> implements HrRepositoryInterface<Hr> {
   constructor(@ModelContainer(Hr.tableName) Hr: ModelCtor<Hr>) {
     super(Hr);
   }

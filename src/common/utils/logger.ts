@@ -53,10 +53,7 @@ const logger = winston.createLogger({
 
 logger.add(
   new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.splat(),
-      winston.format.colorize(),
-    ),
+    format: winston.format.combine(winston.format.splat(), winston.format.colorize()),
   }),
 );
 
