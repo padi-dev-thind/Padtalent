@@ -14,7 +14,6 @@ import {
   Delete,
   Put,
 } from 'routing-controllers';
-import { AuthMiddleware } from '@middlewares/auth.middleware';
 import { Service } from 'typedi';
 import CandidateRepository from '@repositories/candidate.repository';
 import TestRepository from '@repositories/test.repository';
@@ -25,10 +24,10 @@ import { AuthRequest } from '@interfaces/response.interface';
 import { CandidateMiddleware } from '@middlewares/candidate.middleware';
 import { GameTotalTime, GameType, NumberOfQuestionGame } from '@enum/game.enum';
 import { MemoryQuestionDto } from 'dtos/question.dto';
-import { toNumber } from '@lib/env/utils';
 import Memory_questionsRepository from '@repositories/memory_questions.repository';
 import Memory_questions_testsRepository from '@repositories/memory_questions_tests.repository';
 import { HttpException } from '@exceptions/http.exception';
+import { memoryQuestionTimeout } from '@services/checkTimeout';
 
 @JsonController('/memory-test')
 @Service()
@@ -50,7 +49,6 @@ class MemoryTestController extends BaseController {
   @Get('/start')
   async getAssessments(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
-      let isSuccess = 1;
       let firstQuestion = null;
       //check if test had been created
       const test = await this.testRepository.findByCondition({
@@ -61,7 +59,6 @@ class MemoryTestController extends BaseController {
         },
       });
       if (test) {
-        isSuccess = 0;
         throw new HttpException(400, 'the test had been created before');
       }
       //create new test
@@ -77,24 +74,28 @@ class MemoryTestController extends BaseController {
         status: 'in progress',
       });
       //logic create question :
-      for (let i = 1; i <= 10; i++) {
+      for (let i = 1; i <= NumberOfQuestionGame.memory; i++) {
         const questions = await this.memory_questionsRepository.getAll({
           where: { level: i },
         });
         let status = 'not answer';
+        let is_showed_at = null 
         //add to Memory_question_test
         const random_question_index = Math.floor(Math.random() * questions.length);
         if (i == 1) {
           firstQuestion = questions[random_question_index];
           status = 'answering';
+          is_showed_at = new Date()
         }
         await this.memory_questions_testsRepository.create({
           memory_question_id: questions[random_question_index].id,
           test_id: newtest.id,
           question_number: i,
           status: status,
+          is_showed_at: is_showed_at
         });
       }
+      firstQuestion.answer =""
       return this.setData(firstQuestion).setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
@@ -110,7 +111,7 @@ class MemoryTestController extends BaseController {
   @Get('/continue') //socket.on('disconnect', callback()); - client side
   async continue(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
-      let isShowedData = false;
+      let question_raw
       const test = await this.testRepository.findByCondition({
         where: {
           candidate_id: req.candidate.id,
@@ -122,91 +123,62 @@ class MemoryTestController extends BaseController {
       let isSuccess = 1;
       let recentQuestion = null;
       if (test) {
-        const question_raw = await this.memory_questions_testsRepository.findByCondition({
+        question_raw = await this.memory_questions_testsRepository.findByCondition({
           where: {
             status: 'answering',
             test_id: test.id,
           },
         });
         if (question_raw) {
-          isShowedData = question_raw.isShowedData;
+          //get question
           recentQuestion = await this.memory_questionsRepository.findById(
             question_raw.memory_question_id,
           );
+          //check time out
+          const isTimeout = memoryQuestionTimeout(question_raw, recentQuestion.level)
+          if(isTimeout){
+            await this.testRepository.update(
+              {
+                remaining_time: 0,
+                status: 'completed'
+              },
+              {
+                where: {
+                  id: test.id,
+                },
+              },
+            );
+            throw new HttpException(400,'time out');
+            }
+          recentQuestion.answer = ""
         } else {
-          isSuccess = 0;
           throw new HttpException(400, 'can not find question or question was deleted');
         }
       } else {
-        isSuccess = 0;
         throw new HttpException(400, 
           'can not find question or question is answerd or question was deleted',
         );
       }
-      if (isSuccess)
-        return this.setData({
-          recentQuestion: recentQuestion,
-          test_result: test.result,
-          isShowedData: isShowedData,
-          remaining_time: test.remaining_time,
-        })
-          .setMessage('Success')
-          .responseSuccess(res);
-    } catch (error) {
-      return this.setData({})
-        .setCode(error?.status || 500)
-        .setStack(error.stack)
-        .setMessage(error?.message || 'Internal server error')
-        .responseErrors(res);
-    }
-  }
 
-  @Authorized()
-  @UseBefore(CandidateMiddleware)
-  @Post('/ShowedData') //socket.on('disconnect', callback()); - client side
-  async setIsShowData(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
-    try {
-      let isShowData = false;
-      const { question_number } = req.body;
-      const test = await this.testRepository.findByCondition({
-        where: {
-          candidate_id: req.candidate.id,
-          assessment_id: req.assessment.id,
-          game_type_id: GameType.memory,
-          status: 'in progress',
-        },
-      });
-      let isSuccess = 1;
-      if (test) {
-        const question_raw = await this.memory_questions_testsRepository.findByCondition({
-          where: {
-            question_number: question_number,
-            status: 'answering',
-            test_id: test.id,
-          },
-        });
-        if (question_raw) {
-          await this.memory_questions_testsRepository.update(
-            { isShowedData: true },
-            {
-              where: {
-                status: 'answering',
-                test_id: test.id,
-              },
-            },
-          );
-        } else {
-          isSuccess = 0;
-          throw new HttpException(400, 
-            'can not find question or question is answerd or question was deleted',
-          );
-        }
-      } else {
-        isSuccess = 0;
-        throw new HttpException(400, 'test not start or have been completed or assessment is deleted');
+      var show_data_time_remain = 0
+      var remaining_time = 0
+      var now_date = new Date()
+      var now = now_date.getTime()
+      var show_data_time = question_raw.is_showed_at.getTime()
+      const t = now - show_data_time
+      if (t <= recentQuestion.level*10000)
+        show_data_time_remain = recentQuestion.level*10000 - t
+      if (t <= (recentQuestion.level*20000)){
+        remaining_time = recentQuestion.level*20000 - t
       }
-      if (isSuccess)
-        return this.setData('update successdully').setMessage('Success').responseSuccess(res);
+      return this.setData({
+        recentQuestion: recentQuestion,
+        test_result: test.result,
+        show_data_time_remain: show_data_time_remain,
+        remaining_time: remaining_time,
+      })
+        .setMessage('Success')
+        .responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)
@@ -239,10 +211,11 @@ class MemoryTestController extends BaseController {
       let test_status = 'in progress';
       let new_test_result = null;
       let question_number = 0;
-
+      let recentQuestion_raw
+      let nextQuestion_raw
       if (test) {
         new_test_result = test.result;
-        const recentQuestion_raw = await this.memory_questions_testsRepository.findByCondition({
+        recentQuestion_raw = await this.memory_questions_testsRepository.findByCondition({
           where: {
             test_id: test.id,
             status: 'answering',
@@ -250,7 +223,7 @@ class MemoryTestController extends BaseController {
         });
         question_number = recentQuestion_raw.question_number;
         if (question_number == NumberOfQuestionGame.memory) test_status = 'completed';
-        const nextQuestion_raw = await this.memory_questions_testsRepository.findByCondition({
+        nextQuestion_raw = await this.memory_questions_testsRepository.findByCondition({
           where: {
             question_number: question_number + 1,
             test_id: test.id,
@@ -260,16 +233,31 @@ class MemoryTestController extends BaseController {
           recentQuestion = await this.memory_questionsRepository.findById(
             recentQuestion_raw.memory_question_id,
           );
+          //check time out
+          const isTimeout = memoryQuestionTimeout(recentQuestion_raw, recentQuestion.level)
+          if(isTimeout){
+            await this.testRepository.update(
+              {
+                remaining_time: 0,
+                status: 'completed'
+              },
+              {
+                where: {
+                  id: test.id,
+                },
+              },
+            );
+            test_status = 'completed';
+            }
           if (nextQuestion_raw)
             nextQuestion = await this.memory_questionsRepository.findById(
               nextQuestion_raw.memory_question_id,
             );
           //check if answer is true
-          console.log(recentQuestion.data);
           if (candidate_answer == 'skip') {
             status = 'skip';
           } else {
-            if (recentQuestion.data == candidate_answer) {
+            if (recentQuestion.data == candidate_answer ) {
               status = 'correct answer';
               new_test_result = recentQuestion.level;
             } else {
@@ -292,7 +280,11 @@ class MemoryTestController extends BaseController {
           );
           //update the status
           await this.memory_questions_testsRepository.update(
-            { status: 'answering' },
+            { 
+              status: 'answering',
+              is_showed_at: new Date() 
+            }
+            ,
             {
               where: {
                 question_number: question_number + 1,
@@ -320,15 +312,31 @@ class MemoryTestController extends BaseController {
         isSuccess = 0;
         throw new HttpException(400, 'test not start or have been completed or assessment is deleted');
       }
+
       let data = null;
-      if (test_status == 'in progress')
+      var show_data_time_remain = 0
+      var remaining_time = 0
+      var now_date = new Date()
+      var now = now_date.getTime()
+      var show_data_time = recentQuestion_raw.is_showed_at.getTime()
+      const t = now - show_data_time
+      if (t <= recentQuestion.level*10000)
+        show_data_time_remain = recentQuestion.level*10000 - t
+      if (t <= (recentQuestion.level*20000))
+        remaining_time = recentQuestion.level*20000 - t
+
+      if (test_status == 'in progress'){
+      nextQuestion.answer = ""
         data = {
           nextQuestion: nextQuestion,
           next_question_number: question_number + 1,
           result: status,
           new_test_result: new_test_result,
           test_status: test_status,
+          show_data_time_remain: show_data_time_remain,
+          remaining_time: remaining_time,
         };
+      }
       else if (test_status == 'completed') {
         data = {
           result: status,
@@ -380,6 +388,44 @@ class MemoryTestController extends BaseController {
         return this.setData('leave the test! the has been saved')
           .setMessage('Success')
           .responseSuccess(res);
+    } catch (error) {
+      return this.setData({})
+        .setCode(error?.status || 500)
+        .setStack(error.stack)
+        .setMessage(error?.message || 'Internal server error')
+        .responseErrors(res);
+    }
+  }
+
+  @Authorized()
+  @UseBefore(CandidateMiddleware)
+  @Put('/time-out')
+  async setTimeOut(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+    try {
+      const test = await this.testRepository.findByCondition({
+        where: {
+          candidate_id: req.candidate.id,
+          assessment_id: req.assessment.id,
+          game_type_id: GameType.memory,
+          status: 'in progress',
+        },
+      });
+      if (test) {
+        await this.testRepository.update(
+          {
+            remaining_time: 0,
+            status: 'completed', // completed if answer is wrong or last question
+          },
+          {
+            where: {
+              id: test.id,
+            },
+          },
+        );
+      } else {
+        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
+      }
+        return this.setData({result: test.result}).setMessage('set time out seccessfully').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)

@@ -6,6 +6,7 @@ import { IAccessToken, ICandidateAccessToken } from '@interfaces/token.interface
 import { verifyToken } from '@utils/tokenHandler';
 import Candidate from '@models/entities/candidates';
 import Assessment from '@models/entities/assessments';
+import { DATE } from 'sequelize';
 
 @Service()
 export class CandidateMiddleware implements ExpressMiddlewareInterface {
@@ -41,6 +42,16 @@ export class CandidateMiddleware implements ExpressMiddlewareInterface {
 
       if (assessemnt.is_archived) {
         return next(new HttpException(401, 'Assessments has been archived'));
+      }
+
+      if (assessemnt.end_date ) {
+        if (assessemnt.end_date > new Date())
+        return next(new HttpException(401, 'Assessments was out of date'));
+      }
+
+      if (assessemnt.start_date ) {
+        if (assessemnt.start_date < new Date())
+        return next(new HttpException(401, 'Assessments is not started'));
       }
 
       request.candidate = candidate;

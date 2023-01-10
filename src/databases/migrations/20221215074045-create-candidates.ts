@@ -13,6 +13,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.TEXT,
         unique: true,
+        isEmail: true,
+        validate: {
+          isEmail: {
+            msg: 'must be email'
+          }
+        }
       },
       created_at: {
         allowNull: false,

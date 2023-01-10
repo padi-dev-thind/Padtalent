@@ -6,6 +6,7 @@ import {
   DataType,
   DeletedAt,
   HasMany,
+  IsEmail,
   Model,
   PrimaryKey,
   Table,
@@ -35,6 +36,7 @@ export default class Hr extends Model<Hr> {
   @Column
   logo!: string;
 
+  @IsEmail
   @Column
   email!: string;
 

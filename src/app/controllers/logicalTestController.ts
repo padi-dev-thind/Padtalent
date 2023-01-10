@@ -29,6 +29,7 @@ import { GameTotalTime, GameType, NumberOfQuestionGame } from '@enum/game.enum';
 import { LogicalQuestionDto } from 'dtos/question.dto';
 import { toNumber } from '@lib/env/utils';
 import { HttpException } from '@exceptions/http.exception';
+import { timeout } from '@services/checkTimeout';
 
 @JsonController('/logical-test')
 @Service()
@@ -60,9 +61,10 @@ class logicalTestController extends BaseController {
         },
       });
       if (test) {
-        throw new Error('the test had been created before');
+        throw new HttpException(400,'the test had been created before');
       }
       //create new test
+      const now = new Date()
       const newtest = await this.testRepository.create({
         game_type_id: GameType.logical,
         candidate_id: req.candidate.id,
@@ -71,16 +73,10 @@ class logicalTestController extends BaseController {
         remaining_time: GameTotalTime.logical,
         result: 0,
         number_of_questions: NumberOfQuestionGame.logical,
-        start_time: new Date(),
+        start_time: now,
+        end_time: new Date(now.getTime() + GameTotalTime.logical),
         status: 'in progress',
       });
-
-      //set time out for the test
-      this.testTimeOut = setTimeout(async()=>
-      {
-        console.log('logical test id: ' + newtest.id + ' time out')
-        await this.testRepository.update({status: 'completed', remaining_time: 0},{where:{id: newtest.id}})
-      }, GameTotalTime.logical)
 
       let firstQuestion = null;
       const yes_data = await this.logical_questionsRepository.getByCondition(
@@ -118,6 +114,7 @@ class logicalTestController extends BaseController {
         count++;
       }
       firstQuestion = random_questions[0];
+      firstQuestion.answer = ""
       return this.setData({ 
         firstQuestion: firstQuestion,
         result: 'answering',
@@ -127,9 +124,10 @@ class logicalTestController extends BaseController {
         .responseSuccess(res);
     } catch (error) {
       return this.setData({})
-        .setStack(error.stack)
-        .setMessage(error?.message || 'Internal server error')
-        .responseErrors(res);
+      .setCode(error?.status || 500)
+      .setStack(error.stack)
+      .setMessage(error?.message || 'Internal server error')
+      .responseErrors(res);
     }
   }
 
@@ -145,10 +143,28 @@ class logicalTestController extends BaseController {
           game_type_id: GameType.logical,
           status: 'in progress',
         },
-      });
+      })
+
       let isSuccess = 1;
-      let recentQuestion = null;
+      var recentQuestion = null;
       if (test) {
+        //check time out
+        const isTimeout = timeout(test)
+        if(isTimeout){
+          await this.testRepository.update(
+            {
+              remaining_time: 0,
+              status: 'completed'
+            },
+            {
+              where: {
+                id: test.id,
+              },
+            },
+          );
+          throw new HttpException(400,'time out');
+        }
+        // update table
         const question_raw = await this.logical_questions_testsRepository.findByCondition({
           where: {
             status: 'answering',
@@ -160,63 +176,29 @@ class logicalTestController extends BaseController {
             question_raw.logical_question_id,
           );
         else {
-          isSuccess = 0;
           throw new HttpException(400,'can not find question or question was deleted');
         }
       } else {
-        isSuccess = 0;
         throw new HttpException(400,'test not start or have been completed or assessment is deleted');
       }
-      if (isSuccess)
-        return this.setData({
-          recentQuestion: recentQuestion,
-          test_result: test.result,
-          remaining_time: test.remaining_time,
-        })
-          .setMessage('Success')
-          .responseSuccess(res);
+      
+      var now_date = new Date()
+      var now = now_date.getTime()
+      var end_time = test.end_time.getTime()
+      recentQuestion.answer = ""
+      return this.setData({
+        recentQuestion: recentQuestion,
+        test_result: test.result,
+        remaining_time: end_time - now,
+      })
+        .setMessage('Success')
+        .responseSuccess(res);
     } catch (error) {
       return this.setData({})
-        .setStack(error.stack)
-        .setMessage(error?.message || 'Internal server error')
-        .responseErrors(res);
-    }
-  }
-
-  @Authorized()
-  @UseBefore(CandidateMiddleware)
-  @Post('/disconnect') //socket.on('disconnect', callback()); - client side
-  async disconnetTest(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
-    try {
-      const test = await this.testRepository.findByCondition({
-        where: {
-          candidate_id: req.candidate.id,
-          assessment_id: req.assessment.id,
-          game_type_id: GameType.logical,
-          status: 'in progress',
-        },
-      });
-      let isSuccess = 1;
-      if (test) {
-        const { remaining_time } = req.body;
-        //
-        await this.testRepository.update(
-          { remaining_time: remaining_time },
-          { where: { id: test.id } },
-        );
-      } else {
-        isSuccess = 0;
-        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
-      }
-      if (isSuccess)
-        return this.setData('updated successfully - user disconnected')
-          .setMessage('Success')
-          .responseSuccess(res);
-    } catch (error) {
-      return this.setData({})
-        .setStack(error.stack)
-        .setMessage(error?.message || 'Internal server error')
-        .responseErrors(res);
+      .setCode(error?.status || 500)
+      .setStack(error.stack)
+      .setMessage(error?.message || 'Internal server error')
+      .responseErrors(res);
     }
   }
 
@@ -226,7 +208,7 @@ class logicalTestController extends BaseController {
   async getResultRecentQuestion(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const logicalQuestionDto: LogicalQuestionDto = req.body;
-      const { remaining_time, candidate_answer } = logicalQuestionDto;
+      const candidate_answer  = logicalQuestionDto.candidate_answer;
       const test = await this.testRepository.findByCondition({
         where: {
           candidate_id: req.candidate.id,
@@ -235,7 +217,6 @@ class logicalTestController extends BaseController {
           status: 'in progress',
         },
       });
-      let isSuccess = 1;
       let nextQuestion = null;
       let recentQuestion = null;
       let status = 'wrong answer';
@@ -245,15 +226,24 @@ class logicalTestController extends BaseController {
       let question_number = 0;
       let data = null;
 
-      //check if test is timeout
-      
-      if (remaining_time <= 0) {
-        await this.testRepository.update({status: 'completed'},{where:{id: test.id}})
-        clearTimeout(this.testTimeOut)
-        console.log('clear time out')
-      }
-
       if (test) {
+        //check time out
+        const isTimeout = timeout(test)
+        if(isTimeout){
+          await this.testRepository.update(
+            {
+              remaining_time: 0,
+              status: 'completed'
+            },
+            {
+              where: {
+                id: test.id,
+              },
+            },
+          );
+          throw new HttpException(400,'time out');
+        }
+        //
         new_test_result = test.result;
         const recentQuestion_raw = await this.logical_questions_testsRepository.findByCondition({
           where: {
@@ -266,7 +256,6 @@ class logicalTestController extends BaseController {
         //check if the recent question is the lat question
         if (question_number == NumberOfQuestionGame.logical) test_status = 'completed';
         //get the next question
-
         const nextQuestion_raw = await this.logical_questions_testsRepository.findByCondition({
           where: {
             question_number: question_number + 1,
@@ -277,10 +266,12 @@ class logicalTestController extends BaseController {
           recentQuestion = await this.logical_questionsRepository.findById(
             recentQuestion_raw.logical_question_id,
           );
-          if (nextQuestion_raw)
+          if (nextQuestion_raw){
             nextQuestion = await this.logical_questionsRepository.findById(
               nextQuestion_raw.logical_question_id,
             );
+            nextQuestion.answer = ""
+          }
           //check if answer is true
           if (candidate_answer == 'skip') {
             status = 'skip';
@@ -319,7 +310,6 @@ class logicalTestController extends BaseController {
           await this.testRepository.update(
             {
               result: new_test_result,
-              remaining_time: remaining_time,
               status: test_status,
             },
             {
@@ -329,43 +319,44 @@ class logicalTestController extends BaseController {
             },
           );
         } else {
-          isSuccess = 0;
           throw new HttpException(400,
             'can not find question or question was answered or question was deleted',
           );
         }
-      } else {
-        isSuccess = 0;
-        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
-      }
-      if (test_status == 'in progress')
-        data = {
-          nextQuestion: nextQuestion,
-          next_question_number: question_number + 1,
-          result: status,
-          new_test_result: new_test_result,
-          test_status: test_status,
-        };
-      else if (test_status == 'completed') {
-        console.log('clear time out')
-        clearTimeout(this.testTimeOut)
-        data = {
-          result: status,
-          test_result: new_test_result,
-          test_status: test_status,
-        };
-      }
-      if (isSuccess)
+
+        var now_date = new Date()
+        var now = now_date.getTime()
+        var end_time = test.end_time.getTime()
+        if (test_status == 'in progress')
+          data = {
+            nextQuestion: nextQuestion,
+            next_question_number: question_number + 1,
+            remaining_time: end_time - now,
+            result: status,
+            new_test_result: new_test_result,
+            test_status: test_status,
+          };
+        else if (test_status == 'completed') {
+          data = {
+            result: status,
+            test_result: new_test_result,
+            test_status: test_status,
+          };
+        }
         return this.setData({
-          data,
+          data
         })
           .setMessage('Success')
           .responseSuccess(res);
+      } else {
+        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
+      }
     } catch (error) {
       return this.setData({})
-        .setStack(error.stack)
-        .setMessage(error?.message || 'Internal server error')
-        .responseErrors(res);
+      .setCode(error?.status || 500)
+      .setStack(error.stack)
+      .setMessage(error?.message || 'Internal server error')
+      .responseErrors(res);
     }
   }
 
@@ -382,13 +373,7 @@ class logicalTestController extends BaseController {
           status: 'in progress',
         },
       });
-
-      let isSuccess = 1;
-
       if (test) {
-
-        clearTimeout(this.testTimeOut)
-        console.log('clear time out')
         await this.testRepository.update(
           {
             remaining_time: 0,
@@ -401,56 +386,9 @@ class logicalTestController extends BaseController {
           },
         );
       } else {
-        isSuccess = 0;
         throw new HttpException(400,'test not start or have been completed or assessment is deleted');
       }
-      if (isSuccess)
-        return this.setData('set time out seccessfully').setMessage('Success').responseSuccess(res);
-    } catch (error) {
-      return this.setData({})
-        .setCode(error?.status || 500)
-        .setStack(error.stack)
-        .setMessage(error?.message || 'Internal server error')
-        .responseErrors(res);
-    }
-  }
-
-  @Authorized()
-  @UseBefore(CandidateMiddleware)
-  @Put('/leave')
-  async leaveRecentTest(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
-    try {
-      const remaining_time = req.body;
-      const test = await this.testRepository.findByCondition({
-        where: {
-          candidate_id: req.candidate.id,
-          assessment_id: req.assessment.id,
-          game_type_id: GameType.logical,
-          status: 'in progress',
-        },
-      });
-
-      let isSuccess = 1;
-
-      if (test) {
-        await this.testRepository.update(
-          {
-            remaining_time: remaining_time,
-          },
-          {
-            where: {
-              id: test.id,
-            },
-          },
-        );
-      } else {
-        isSuccess = 0;
-        throw new HttpException(400,'test not start or have been completed or assessment is deleted');
-      }
-      if (isSuccess)
-        return this.setData('leave the test! the has been saved')
-          .setMessage('Success')
-          .responseSuccess(res);
+        return this.setData({result: test.result}).setMessage('set time out seccessfully').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)

@@ -112,7 +112,7 @@ class AssessmentController extends BaseController {
         },
       );
       if (updateAss == 0) {
-        throw new HttpException(400,'can find this assessment');
+        throw new HttpException(400,'not found this assessment');
       }
       //update game type
       for (const type of game_types) {
@@ -374,14 +374,27 @@ class AssessmentController extends BaseController {
   async uploadCandidateList(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
     try {
       const data = req.body;
-      const list = await this.candidateRepository.bulkCreate(data);
-      for (const candidate of list) {
-        await this.candidates_assessmentsRepository.create({
-          candidate_id: candidate.id,
-          assessment_id: req.params.id,
+      const list_candidate = []
+      for(const email of data){
+        const [candidate, created] = await this.candidateRepository.findOrCreateByCondition(
+          {
+            where: {email: email.email},
+            defaults: {
+              email: email.email
+            }
+          })
+        list_candidate.push(candidate)
+      }
+      for (const candidate of list_candidate) {
+        await this.candidates_assessmentsRepository.findOrCreateByCondition({
+          where: {candidate_id: candidate.id},
+          defaults: {
+            candidate_id: candidate.id,
+            assessment_id: req.params.id,
+          }
         });
       }
-      return this.setData(list).setMessage('Success').responseSuccess(res);
+      return this.setData(list_candidate).setMessage('Success').responseSuccess(res);
     } catch (error) {
       return this.setData({})
         .setCode(error?.status || 500)

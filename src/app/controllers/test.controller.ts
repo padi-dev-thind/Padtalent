@@ -48,7 +48,7 @@ class TestController extends BaseController {
     const that = this;
     try {
       const assessment_game_types = await this.assessment_game_typeRepository.getAll({
-        where: { assessment_id: req.assessment.id },
+        where: { assessment_id: req.assessment.id},
       });
 
       const tests = await Promise.all(assessment_game_types.map(test_filter));

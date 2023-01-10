@@ -85,6 +85,7 @@ class HrController extends BaseController {
           game_type_id: type,
         });
       }
+      newHr.password = ""
       return this.setData({
         newHr: newHr,
         game_types: game_types,

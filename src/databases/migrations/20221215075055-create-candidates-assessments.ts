@@ -33,9 +33,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING(20),
         validate: {
-          isIn: [['ready', 'not ready', 'deleted', 'time out']],
+          isIn: [['avaliable', 'accepted', 'out of date']],
         },
-        defaultValue: 'not ready',
+        defaultValue: 'avaliable',
       },
       created_at: {
         allowNull: false,

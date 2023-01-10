@@ -47,10 +47,9 @@ module.exports = {
         },
         defaultValue: 'not answer',
       },
-      is_showed_data: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
+      is_showed_at: {
+        allowNull: true,
+        type: Sequelize.DATE,
       },
       created_at: {
         allowNull: false,

@@ -1,3 +1,4 @@
+import { isEmail } from 'class-validator';
 import {
   AutoIncrement,
   BelongsToMany,
@@ -9,6 +10,7 @@ import {
   PrimaryKey,
   Table,
   UpdatedAt,
+  IsEmail
 } from 'sequelize-typescript';
 import Assessment from './assessments';
 import Candidate_assessment from './candidates_assessments';
@@ -24,6 +26,7 @@ export default class Candidate extends Model<Candidate> {
   })
   id!: string;
 
+  @IsEmail
   @Column
   email!: string;
 
