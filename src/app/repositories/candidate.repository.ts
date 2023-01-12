@@ -7,18 +7,18 @@ import { ModelContainer } from '@decorators/model.decorator';
 
 @Service({ global: true })
 class CandidateRepository
-  extends BaseRepository<Candidate>
-  implements CandidateRepositoryInterface<Candidate>
+    extends BaseRepository<Candidate>
+    implements CandidateRepositoryInterface<Candidate>
 {
-  constructor(@ModelContainer(Candidate.tableName) Candidate: ModelCtor<Candidate>) {
-    super(Candidate);
-  }
+    constructor(@ModelContainer(Candidate.tableName) Candidate: ModelCtor<Candidate>) {
+        super(Candidate);
+    }
 
-  async findByEmail(email: string): Promise<Candidate> {
-    return this.findByCondition({
-      where: { email: email },
-      raw: true,
-    });
-  }
+    async findByEmail(email: string): Promise<Candidate> {
+        return this.findByCondition({
+            where: { email: email },
+            raw: true,
+        });
+    }
 }
 export default CandidateRepository;

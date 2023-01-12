@@ -1,12 +1,12 @@
 export interface IRefreshToken {
-  id: number;
+    id: number;
 }
 
 export interface IAccessToken {
-  id: number;
+    id: number;
 }
 
 export interface ICandidateAccessToken {
-  candidate_id: number;
-  assessment_id: number;
+    candidate_id: number;
+    assessment_id: number;
 }

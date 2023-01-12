@@ -7,15 +7,15 @@ import { ModelContainer } from '@decorators/model.decorator';
 
 @Service({ global: true })
 class Memory_questions_testsRepository
-  extends BaseRepository<Memory_questions_tests>
-  implements Memory_questions_testsRepositoryInterface<Memory_questions_tests>
+    extends BaseRepository<Memory_questions_tests>
+    implements Memory_questions_testsRepositoryInterface<Memory_questions_tests>
 {
-  constructor(
-    @ModelContainer(Memory_questions_tests.tableName)
-    Memory_questions_tests: ModelCtor<Memory_questions_tests>,
-  ) {
-    super(Memory_questions_tests);
-  }
+    constructor(
+        @ModelContainer(Memory_questions_tests.tableName)
+        Memory_questions_tests: ModelCtor<Memory_questions_tests>,
+    ) {
+        super(Memory_questions_tests);
+    }
 }
 
 export default Memory_questions_testsRepository;

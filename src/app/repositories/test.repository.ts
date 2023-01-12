@@ -7,16 +7,16 @@ import { ModelContainer } from '@decorators/model.decorator';
 
 @Service({ global: true })
 class TestRepository extends BaseRepository<Test> implements TestRepositoryInterface<Test> {
-  constructor(@ModelContainer(Test.tableName) Test: ModelCtor<Test>) {
-    super(Test);
-  }
-  async updateByCondition(object: Object, condition: any): Promise<any> {
-    return this.model.update(object, condition);
-  }
+    constructor(@ModelContainer(Test.tableName) Test: ModelCtor<Test>) {
+        super(Test);
+    }
+    async updateByCondition(object: Object, condition: any): Promise<any> {
+        return this.model.update(object, condition);
+    }
 
-  async incrementResult(object: Object, condition: any): Promise<any> {
-    return this.model.increment(object, condition);
-  }
+    async incrementResult(object: Object, condition: any): Promise<any> {
+        return this.model.increment(object, condition);
+    }
 }
 
 export default TestRepository;

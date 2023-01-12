@@ -7,12 +7,12 @@ import { ModelContainer } from '@decorators/model.decorator';
 
 @Service({ global: true })
 class Game_typeRepository
-  extends BaseRepository<Game_type>
-  implements Game_typeRepositoryInterface<Game_type>
+    extends BaseRepository<Game_type>
+    implements Game_typeRepositoryInterface<Game_type>
 {
-  constructor(@ModelContainer(Game_type.tableName) Game_type: ModelCtor<Game_type>) {
-    super(Game_type);
-  }
+    constructor(@ModelContainer(Game_type.tableName) Game_type: ModelCtor<Game_type>) {
+        super(Game_type);
+    }
 }
 
 export default Game_typeRepository;
