@@ -26,11 +26,11 @@ import Logical_questions_testsRepository from '@repositories/logical_questions_t
 import Memory_questions_testsRepository from '@repositories/memory_questions_tests.repository';
 import { HttpException } from '@exceptions/http.exception';
 import { memoryQuestionTimeout, timeout } from '@services/checkTimeout';
+import Memory_questionsRepository from '@repositories/memory_questions.repository';
 
 @JsonController('/test')
 @Service()
 class TestController extends BaseController {
-    memory_questionsRepository: any;
     constructor(
         protected candidateRepository: CandidateRepository,
         protected testRepository: TestRepository,
@@ -39,6 +39,7 @@ class TestController extends BaseController {
         protected candidates_assessmentsRepository: Candidates_assessmentsRepository,
         protected logical_questions_testsRepository: Logical_questions_testsRepository,
         protected memory_questions_testsRepository: Memory_questions_testsRepository,
+        protected memory_questionsRepository: Memory_questionsRepository,
     ) {
         super();
     }
