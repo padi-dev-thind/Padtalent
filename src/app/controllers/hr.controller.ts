@@ -145,8 +145,8 @@ class HrController extends BaseController {
     @UseBefore(AuthMiddleware)
     @Get('/profile')
     async getProfile(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
-        console.log('a');
         try {
+            req.hr.password = ''
             return this.setData(req.hr).setMessage('Success').responseSuccess(res);
         } catch (error) {
             return this.setData({})
@@ -164,15 +164,6 @@ class HrController extends BaseController {
             const id = req.params.id;
             const hr = await this.hrRepository.findByCondition({ where: { id: id } });
             if (hr) {
-                const assessemnt = await this.assessmentRepository.findByCondition({
-                    where: { hr_id: id },
-                });
-                if (assessemnt)
-                    await this.candidates_assessmentsRepository.delete({
-                        where: { assessment_id: id },
-                    });
-                await this.assessmentRepository.delete({ where: { hr_id: id } });
-                await this.hr_game_typeRepository.delete({ where: { hr_id: id } });
                 await this.hrRepository.deleteById(id);
                 return this.setData('delete successfully')
                     .setMessage('Success')

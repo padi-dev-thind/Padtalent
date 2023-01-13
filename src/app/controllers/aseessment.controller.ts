@@ -101,6 +101,32 @@ class AssessmentController extends BaseController {
 
     @Authorized()
     @UseBefore(AuthMiddleware)
+    @Get('/get-assessment/:id')
+    async getAssessment(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
+        try {
+
+            const assessment = await this.assessmentRepository.findByCondition({
+                where: {
+                    id: req.params.id,
+                    hr_id: req.hr.id,
+                }
+            });
+            if (!assessment) {
+                throw new HttpException(400, 'not found assessment');
+            }
+            
+            return this.setData(assessment).setMessage('Success').responseSuccess(res);
+        } catch (error) {
+            return this.setData({})
+                .setCode(error?.status || 500)
+                .setStack(error.stack)
+                .setMessage(error?.message || 'Internal server error')
+                .responseErrors(res);
+        }
+    }
+
+    @Authorized()
+    @UseBefore(AuthMiddleware)
     @Put('/update/:id')
     async update(@Req() req: AuthRequest, @Res() res: Response, next: NextFunction) {
         try {
